@@ -1,3 +1,4 @@
 asyncio
 uuid
 aiohttp
+requests

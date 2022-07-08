@@ -8,11 +8,12 @@ import os
 import sys
 from html import unescape as html_unescape
 from secrets import SystemRandom
-from typing import Any, Callable, Optional, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from uuid import uuid4
 from warnings import filterwarnings as filter_warnings
 
 import aiohttp  # type: ignore
+import requests  # type: ignore
 
 CONFIG_FILE: str = "config.json"
 CONFIG: Dict[str, Any] = {
@@ -246,6 +247,31 @@ class CommandParser:
 
         save_config()
         return (guac_msg("chat", f"Note {args[0]!r} deleted, sad to see it go kinda"),)
+
+    @staticmethod
+    def cmd_notes(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, lists the notes
+        Syntax: notes"""
+
+        burl: str = "https://www.toptal.com/developers/hastebin"
+
+        pid = requests.post(
+            f"{burl}/documents",
+            data="\n".join(f"* {note}" for note in CONFIG["notes"]),
+        )
+
+        if pid.status_code != 200:
+            return (
+                guac_msg(
+                    "chat", f"Failed to POST to pastebin (code {pid.status_code})"
+                ),
+            )
+
+        return (
+            guac_msg(
+                "chat", f"@{user} Here's a list of notes: {burl}/{pid.json()['key']}.md"
+            ),
+        )
 
 
 class ChatParser:
