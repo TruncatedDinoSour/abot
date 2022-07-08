@@ -4,7 +4,7 @@
 
 # Dependencies
 
-Everything from https://pypi.org/project/ that is in [requirements.txt](/requirements.txt)
+Everything from <https://pypi.org/> that is in [requirements.txt](/requirements.txt)
 
 # Running
 
