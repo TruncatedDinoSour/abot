@@ -16,3 +16,7 @@ pip install -r requirements.txt
 # or pip install --user -r requirements.txt
 python3 src/main.py
 ```
+
+# More
+
+-   <https://blog.ari-web.xyz/b/abot--ari-bot--bot-on-collabvm/>
