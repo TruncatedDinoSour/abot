@@ -1,0 +1,3 @@
+/config.json
+/venv
+.mypy_cache/
