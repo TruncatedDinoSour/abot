@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Abot for ari-web"""
+"""Abot for collabvm"""
 
 import asyncio
 import json
