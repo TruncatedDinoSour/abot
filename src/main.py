@@ -258,7 +258,7 @@ class ChatParser:
         if len(content) > 3:
             return cls.type_nop(content)
 
-        if content[1].startswith(f"@{CONFIG['bot-name']}"):
+        if content[1].startswith(f"@{CONFIG['bot-name']} "):
             user: str = content[0]
             command: list[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
 
