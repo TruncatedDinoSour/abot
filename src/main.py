@@ -8,7 +8,7 @@ import os
 import sys
 from html import unescape as html_unescape
 from secrets import SystemRandom
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from uuid import uuid4
 from warnings import filterwarnings as filter_warnings
 
@@ -23,11 +23,26 @@ CONFIG: Dict[str, Any] = {
     "init-message": "Hello, world!",
     "bye-message": "Goodbye, world!",
     "notes": {},
+    "ignored": [],
 }
 GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
 RANDOM: SystemRandom = SystemRandom()
 AUTH: Dict[str, Any] = {"users": set(), "key": uuid4().hex}
 STATE: Dict[str, bool] = {"run": True}
+
+
+def paste(content: str) -> Union[str, Tuple[None, str]]:
+    burl: str = "https://www.toptal.com/developers/hastebin"
+
+    pid = requests.post(
+        f"{burl}/documents",
+        data=content,
+    )
+
+    if pid.status_code != 200:
+        return (None, f"Failed to POST to pastebin (code {pid.status_code})")
+
+    return f"{burl}/{pid.json()['key']}.md"
 
 
 def reset_authkey() -> None:
@@ -146,11 +161,14 @@ class CommandParser:
         if args[-1] != AUTH["key"]:
             return (guac_msg("chat", f"@{user} your auth key is invalid lmao"),)
 
+        reset_authkey()
+
         auth_user: str = args[0]
         if args[0] == "me":
             auth_user = user
 
-        reset_authkey()
+        if auth_user in CONFIG["ignored"]:
+            return (guac_msg("chat", f"{auth_user!r} is ignored for a reason :|"),)
 
         if args[1] == "in":
             if auth_user in AUTH["users"]:
@@ -253,24 +271,79 @@ class CommandParser:
         """Auth command, lists the notes
         Syntax: notes"""
 
-        burl: str = "https://www.toptal.com/developers/hastebin"
-
-        pid = requests.post(
-            f"{burl}/documents",
-            data="\n".join(f"* {note}" for note in CONFIG["notes"]),
+        pid = paste(
+            "\n".join(f"* {note}" for note in CONFIG["notes"]),
         )
 
-        if pid.status_code != 200:
+        if pid[0] is None:
+            guac_msg("chat", pid[1])
+
+        return (guac_msg("chat", f"@{user} Here's a list of notes: {pid}"),)
+
+    @staticmethod
+    def cmd_ignore(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, ignores a user
+        Syntax: ignore <user>"""
+
+        if not len(args):
+            return (guac_msg("chat", "Who do I even ignore lmao???????"),)
+
+        if args[0] in AUTH["users"]:
             return (
                 guac_msg(
-                    "chat", f"Failed to POST to pastebin (code {pid.status_code})"
+                    "chat",
+                    "Yeah... no, I don't think ignoring authenticated users is a good idea",
                 ),
             )
 
+        if args[0] in CONFIG["ignored"]:
+            return (guac_msg("chat", "You want me to ignore an already ignored user?"),)
+
+        CONFIG["ignored"].append(args[0])
+        save_config()
+
+        return (guac_msg("chat", f"@{args[0]}'s commands will be ignored from now on"),)
+
+    @staticmethod
+    def cmd_acknowledge(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, acknowledges a user
+        Syntax: acknowledge <user>"""
+
+        if not len(args):
+            return (guac_msg("chat", "Hm? Who do you want me to acknowledge?"),)
+
+        if args[0] not in CONFIG["ignored"]:
+            return (
+                guac_msg(
+                    "chat",
+                    "They're not ignored lol, you trying to say something? :eyes:",
+                ),
+            )
+
+        CONFIG["ignored"].remove(args[0])
+        save_config()
+
         return (
             guac_msg(
-                "chat", f"@{user} Here's a list of notes: {burl}/{pid.json()['key']}.md"
+                "chat",
+                f"@{args[0]}'s commands will be not ignored from now on lmao, imagine",
             ),
+        )
+
+    @staticmethod
+    def cmd_ignored(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, lists the ignored users
+        Syntax: ignored"""
+
+        pid = paste(
+            "\n".join(f"* {ignored}" for ignored in CONFIG["ignored"]),
+        )
+
+        if pid[0] is None:
+            guac_msg("chat", pid[1])
+
+        return (
+            guac_msg("chat", f"@{user} Here's ur a list of ignored ppl heh: {pid}"),
         )
 
 
@@ -286,6 +359,10 @@ class ChatParser:
 
         if content[1].startswith(f"@{CONFIG['bot-name']} "):
             user: str = content[0]
+
+            if user in CONFIG["ignored"]:
+                return cls.type_nop(content)
+
             command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
 
             log(f"User {user!r} invoked {command!r}")
