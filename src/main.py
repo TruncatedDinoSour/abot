@@ -23,7 +23,7 @@ CONFIG: Dict[str, Any] = {
     "bye-message": "Goodbye, world!",
     "notes": {},
 }
-GUAC_CACHE: Dict[str, dict[Any, Any]] = {"guac": {}, "unguac": {}}
+GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
 RANDOM: SystemRandom = SystemRandom()
 AUTH: Dict[str, Any] = {"users": set(), "key": uuid4().hex}
 STATE: Dict[str, bool] = {"run": True}
