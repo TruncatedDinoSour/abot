@@ -409,6 +409,14 @@ class ChatParser:
 
         return cls.type_nop(content)
 
+    @classmethod
+    def type_rename(cls, content: List[str]) -> Tuple[str]:
+        if content[2] in AUTH["users"]:
+            log(f"User has renamed themselves so logging {content[2]!r} out")
+            AUTH["users"].remove(content[2])
+
+        return cls.type_nop(content)
+
 
 async def main() -> int:
     """Entry/main function"""
