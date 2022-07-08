@@ -8,14 +8,14 @@ import os
 import sys
 from html import unescape as html_unescape
 from secrets import SystemRandom
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Dict, List, Tuple
 from uuid import uuid4
 from warnings import filterwarnings as filter_warnings
 
 import aiohttp  # type: ignore
 
 CONFIG_FILE: str = "config.json"
-CONFIG: dict[str, Any] = {
+CONFIG: Dict[str, Any] = {
     "max-cache": 10000,
     "bot-name": "example-abot",
     "vm": "vm0",
@@ -23,10 +23,10 @@ CONFIG: dict[str, Any] = {
     "bye-message": "Goodbye, world!",
     "notes": {},
 }
-GUAC_CACHE: dict[str, dict[Any, Any]] = {"guac": {}, "unguac": {}}
+GUAC_CACHE: Dict[str, dict[Any, Any]] = {"guac": {}, "unguac": {}}
 RANDOM: SystemRandom = SystemRandom()
-AUTH: dict[str, Any] = {"users": set(), "key": uuid4().hex}
-STATE: dict[str, bool] = {"run": True}
+AUTH: Dict[str, Any] = {"users": set(), "key": uuid4().hex}
+STATE: Dict[str, bool] = {"run": True}
 
 
 def reset_authkey() -> None:
@@ -62,7 +62,7 @@ def log(msg: str) -> None:
     print(f" :: {msg}")
 
 
-def unguac_msg(msg: str) -> Optional[list[str]]:
+def unguac_msg(msg: str) -> Optional[List[str]]:
     if not msg:
         return []
 
@@ -74,8 +74,8 @@ def unguac_msg(msg: str) -> Optional[list[str]]:
         return _cache[msg]
 
     idx: int = 0
-    result: list[str] = []
-    chars: list[str] = list(msg)
+    result: List[str] = []
+    chars: List[str] = list(msg)
 
     while True:
         dist_str: str = ""
@@ -128,14 +128,14 @@ def unguac_msg(msg: str) -> Optional[list[str]]:
 
 class CommandParser:
     @staticmethod
-    def cmd_hi(user: str, args: list[str]) -> tuple[str]:
+    def cmd_hi(user: str, args: List[str]) -> Tuple[str]:
         """Noauth command, says hello to the user
         Syntax: hi"""
 
         return (guac_msg("chat", f"Hello, @{user}"),)
 
     @staticmethod
-    def cmd_log(user: str, args: list[str]) -> tuple[str]:
+    def cmd_log(user: str, args: List[str]) -> Tuple[str]:
         """Noauth command, authenticates the user
         Syntax: log <me|user> <in|out> <auth key>"""
 
@@ -167,7 +167,7 @@ class CommandParser:
         return (guac_msg("chat", f"@{auth_user} you have been logged {args[1]}"),)
 
     @staticmethod
-    def cmd_getkey(user: str, args: list[str]) -> tuple[str]:
+    def cmd_getkey(user: str, args: List[str]) -> Tuple[str]:
         """Noauth command, authenticates the user
         Syntax: getkey"""
 
@@ -175,14 +175,14 @@ class CommandParser:
         return (guac_msg("chat", f"@{user} check the console for the key"),)
 
     @staticmethod
-    def cmd_whoami(user: str, args: list[str]) -> tuple[str]:
+    def cmd_whoami(user: str, args: List[str]) -> Tuple[str]:
         """Auth command, authenticates the user
         Syntax: getkey"""
 
         return (guac_msg("chat", f"You are {user} :D"),)
 
     @staticmethod
-    def cmd_die(user: str, args: list[str]) -> tuple[str]:
+    def cmd_die(user: str, args: List[str]) -> Tuple[str]:
         """Auth command, exists the server
         Syntax: die"""
 
@@ -194,7 +194,7 @@ class CommandParser:
         return (guac_msg("nop"),)
 
     @staticmethod
-    def cmd_savecfg(user: str, args: list[str]) -> tuple[str]:
+    def cmd_savecfg(user: str, args: List[str]) -> Tuple[str]:
         """Auth command, saves the config
         Syntax: savecfg"""
 
@@ -202,7 +202,7 @@ class CommandParser:
         return (guac_msg("chat", f"{CONFIG_FILE!r} saved"),)
 
     @staticmethod
-    def cmd_note(user: str, args: list[str]) -> tuple[str]:
+    def cmd_note(user: str, args: List[str]) -> Tuple[str]:
         """Auth command, makes a note and then saves the config
         Syntax: note <name> <content...>"""
 
@@ -219,7 +219,7 @@ class CommandParser:
         return (guac_msg("chat", f"Note {args[0]!r} saved <3"),)
 
     @staticmethod
-    def cmd_get(user: str, args: list[str]) -> tuple[str]:
+    def cmd_get(user: str, args: List[str]) -> Tuple[str]:
         """Auth command, gets a note
         Syntax: get <name>"""
 
@@ -232,7 +232,7 @@ class CommandParser:
         return (guac_msg("chat", f"> {CONFIG['notes'][args[0]]}"),)
 
     @staticmethod
-    def cmd_del(user: str, args: list[str]) -> tuple[str]:
+    def cmd_del(user: str, args: List[str]) -> Tuple[str]:
         """Auth command, deletes a note
         Syntax: del <name>"""
 
@@ -250,17 +250,17 @@ class CommandParser:
 
 class ChatParser:
     @staticmethod
-    def type_nop(content: list[str]) -> tuple[str]:
+    def type_nop(content: List[str]) -> Tuple[str]:
         return (guac_msg("nop"),)
 
     @classmethod
-    def type_chat(cls, content: list[str]) -> tuple[str]:
+    def type_chat(cls, content: List[str]) -> Tuple[str]:
         if len(content) > 3:
             return cls.type_nop(content)
 
         if content[1].startswith(f"@{CONFIG['bot-name']} "):
             user: str = content[0]
-            command: list[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
+            command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
 
             log(f"User {user!r} invoked {command!r}")
 
@@ -287,7 +287,7 @@ class ChatParser:
         return cls.type_nop(content)
 
     @classmethod
-    def type_adduser(cls, content: list[str]) -> tuple[str]:
+    def type_adduser(cls, content: List[str]) -> Tuple[str]:
         if RANDOM.randint(0, 100) == 96:
             log(f"Welcoming {content[1]!r}")
             return (guac_msg("chat", f"Welcome, {content[1]!r}. How are you?"),)
@@ -295,7 +295,7 @@ class ChatParser:
         return cls.type_nop(content)
 
     @classmethod
-    def type_remuser(cls, content: list[str]) -> tuple[str]:
+    def type_remuser(cls, content: List[str]) -> Tuple[str]:
         if RANDOM.randint(0, 100) == 69:
             log(f"Saying goobye to {content[1]!r}")
             return (guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day"),)
@@ -338,7 +338,7 @@ async def main() -> int:
         log(f"Auth key: {AUTH['key']}")
 
         async for msg in ws:
-            parsed_msg: Optional[list[str]] = unguac_msg(msg.data)
+            parsed_msg: Optional[List[str]] = unguac_msg(msg.data)
 
             if parsed_msg is None:
                 ws.send_str(
