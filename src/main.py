@@ -24,10 +24,49 @@ CONFIG: Dict[str, Any] = {
     "bye-message": "Goodbye, world!",
     "notes": {},
     "ignored": [],
+    "insults": {
+        "adjectives": [
+            "huge",
+            "shitty",
+            "igdiotic",
+            "stupid",
+            "deformed",
+            "cranky",
+            "weird",
+            "trashy",
+            "unskilled",
+            "",
+        ],
+        "nouns": [
+            "turnip",
+            "punchbag",
+            "kid",
+            "dog",
+            "asshole",
+            "hairball",
+            "dumbster rat",
+            "dumbsterfire",
+            "wet-wipe",
+            "hag",
+            "shit",
+            "skid",
+        ],
+        "descriptors": ["piece of", "chunk of", "son of a", ""],
+    },
 }
-GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
 RANDOM: SystemRandom = SystemRandom()
-AUTH: Dict[str, Any] = {"users": set(), "key": uuid4().hex}
+
+
+def gen_key() -> str:
+    _key: list[str] = list(
+        f"{hex(RANDOM.randint(0, 123456789))}{uuid4().hex}{RANDOM.randint(0, 123456789101112)}"
+    )
+    RANDOM.shuffle(_key)
+    return "".join(_key)
+
+
+GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
+AUTH: Dict[str, Any] = {"users": set(), "key": gen_key()}
 STATE: Dict[str, bool] = {"run": True}
 
 
@@ -46,7 +85,7 @@ def paste(content: str) -> Union[str, Tuple[None, str]]:
 
 
 def reset_authkey() -> None:
-    AUTH["key"] = uuid4().hex
+    AUTH["key"] = gen_key()
     log(f"New auth key: {AUTH['key']}")
 
 
@@ -344,6 +383,26 @@ class CommandParser:
 
         return (
             guac_msg("chat", f"@{user} Here's ur a list of ignored ppl heh: {pid}"),
+        )
+
+    @staticmethod
+    def cmd_insult(user: str, args: List[str]) -> Tuple[str]:
+        """Noauth command, insults a specified user
+        Syntax: insult <user>"""
+
+        if not len(args):
+            return (guac_msg("chat", "I like.. need the <user> to insult them lmao"),)
+
+        if args[0] == "me":
+            args[0] = user
+
+        return (
+            guac_msg(
+                "chat",
+                " ".join(
+                    f"@{args[0]} you are a {' '.join(RANDOM.choice(CONFIG['insults'][_from]) for _from in ('descriptors', 'adjectives', 'nouns'))}".split()
+                ),
+            ),
         )
 
 
