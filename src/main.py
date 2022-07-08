@@ -53,6 +53,7 @@ CONFIG: Dict[str, Any] = {
         ],
         "descriptors": ["piece of", "chunk of", "son of a", ""],
     },
+    "reconnect": 30,
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -67,7 +68,7 @@ def gen_key() -> str:
 
 GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
 AUTH: Dict[str, Any] = {"users": set(), "key": gen_key()}
-STATE: Dict[str, bool] = {"run": True}
+STATE: Dict[str, bool] = {"run": True, "restart": False}
 
 
 def paste(content: str) -> Union[str, Tuple[None, str]]:
@@ -505,6 +506,7 @@ async def main() -> int:
         await ws.send_str(guac_msg("connect", CONFIG["vm"]))
 
         log("Connected")
+        STATE["restart"] = False
 
         if CONFIG["init-message"].strip():
             await ws.send_str(guac_msg("chat", CONFIG["init-message"]))
@@ -512,6 +514,18 @@ async def main() -> int:
         log(f"Auth key: {AUTH['key']}")
 
         async for msg in ws:
+            if ws.closed:
+                log(
+                    f"We got kicked :( Reconnecting after {CONFIG['reconnect']} seconds..."
+                )
+
+                STATE["restart"] = True
+
+                await ws.close()
+                await asyncio.sleep(CONFIG["reconnect"])
+
+                break
+
             parsed_msg: Optional[List[str]] = unguac_msg(msg.data)
 
             if parsed_msg is None:
@@ -542,4 +556,12 @@ if __name__ == "__main__":
     assert main.__annotations__.get("return") is int, "main() should return an integer"
 
     filter_warnings("error", category=Warning)
-    sys.exit(asyncio.run(main()))
+
+    def __run__() -> int:
+        return asyncio.run(main())
+
+    ret: int = __run__()
+    while STATE["restart"]:
+        ret = __run__()
+
+    sys.exit(ret)
