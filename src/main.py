@@ -6,6 +6,7 @@ import asyncio
 import json
 import os
 import sys
+from html import unescape as html_unescape
 from secrets import SystemRandom
 from typing import Any, Callable, Optional
 from uuid import uuid4
@@ -212,7 +213,7 @@ class CommandParser:
                 ),
             )
 
-        CONFIG["notes"][args[0]] = " ".join(args[1:])
+        CONFIG["notes"][args[0]] = html_unescape(" ".join(args[1:]))
 
         save_config()
         return (guac_msg("chat", f"Note {args[0]!r} saved <3"),)
