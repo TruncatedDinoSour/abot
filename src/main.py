@@ -322,6 +322,10 @@ class ChatParser:
 
     @classmethod
     def type_remuser(cls, content: List[str]) -> Tuple[str]:
+        if content[1] in AUTH["users"]:
+            log(f"Logging {content[1]!r} out")
+            AUTH["users"].remove(content[1])
+
         if RANDOM.randint(0, 100) == 69:
             log(f"Saying goobye to {content[1]!r}")
             return (guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day"),)
