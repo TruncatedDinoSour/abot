@@ -178,7 +178,7 @@ class CommandParser:
         """Auth command, authenticates the user
         Syntax: getkey"""
 
-        return (guac_msg("chat", f"{user}"),)
+        return (guac_msg("chat", f"You are {user} :D"),)
 
     @staticmethod
     def cmd_die(user: str, args: list[str]) -> tuple[str]:
