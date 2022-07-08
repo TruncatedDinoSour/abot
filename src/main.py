@@ -28,7 +28,7 @@ CONFIG: Dict[str, Any] = {
         "adjectives": [
             "huge",
             "shitty",
-            "igdiotic",
+            "idiotic",
             "stupid",
             "deformed",
             "cranky",
