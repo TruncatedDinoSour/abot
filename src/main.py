@@ -213,7 +213,7 @@ class CommandParser:
                 ),
             )
 
-        CONFIG["notes"][args[0]] = html_unescape(" ".join(args[1:]))
+        CONFIG["notes"][args[0]] = " ".join(args[1:])
 
         save_config()
         return (guac_msg("chat", f"Note {args[0]!r} saved <3"),)
@@ -229,7 +229,7 @@ class CommandParser:
         if args[0] not in CONFIG["notes"]:
             return (guac_msg("chat", "That's not a note... zamn"),)
 
-        return (guac_msg("chat", f">{CONFIG['notes'][args[0]]}"),)
+        return (guac_msg("chat", f"> {CONFIG['notes'][args[0]]}"),)
 
     @staticmethod
     def cmd_del(user: str, args: list[str]) -> tuple[str]:
@@ -260,7 +260,7 @@ class ChatParser:
 
         if content[1].startswith(f"@{CONFIG['bot-name']}"):
             user: str = content[0]
-            command: list[str] = " ".join(content[1:]).split()[1:]
+            command: list[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
 
             log(f"User {user!r} invoked {command!r}")
 
@@ -318,7 +318,7 @@ async def main() -> int:
     s: aiohttp.ClientSession = aiohttp.ClientSession()
     url: str = f"wss://computernewb.com/collab-vm/{CONFIG['vm']}/"
 
-    log(f"Connecting to {url}")
+    log(f"Connecting to {url!r}")
 
     async with s.ws_connect(
         url,
