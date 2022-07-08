@@ -221,7 +221,7 @@ class CommandParser:
 
     @staticmethod
     def cmd_get(user: str, args: List[str]) -> Tuple[str]:
-        """Auth command, gets a note
+        """Noauth command, gets a note
         Syntax: get <name>"""
 
         if not len(args):
