@@ -133,7 +133,7 @@ class CommandParser:
         """Noauth command, says hello to the user
         Syntax: hi"""
 
-        return (guac_msg("chat", f"Yo bitch @{user}"),)
+        return (guac_msg("chat", f"Hello, @{user} :}}"),)
 
     @staticmethod
     def cmd_log(user: str, args: List[str]) -> Tuple[str]:
