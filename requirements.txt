@@ -1,4 +1,3 @@
 asyncio
-secrets
 uuid
 aiohttp
