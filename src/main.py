@@ -463,7 +463,7 @@ class ChatParser:
 
     @classmethod
     def type_adduser(cls, content: List[str]) -> Tuple[str]:
-        if RANDOM.randint(0, 100) == 96:
+        if RANDOM.randint(0, 200) == 96:
             log(f"Welcoming {content[1]!r}")
             return (guac_msg("chat", f"Welcome, {content[1]!r}. How are you?"),)
 
@@ -475,7 +475,7 @@ class ChatParser:
             log(f"Logging {content[1]!r} out")
             AUTH["users"].remove(content[1])
 
-        if RANDOM.randint(0, 100) == 69:
+        if RANDOM.randint(0, 200) == 69:
             log(f"Saying goobye to {content[1]!r}")
             return (guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day"),)
 
