@@ -54,6 +54,7 @@ CONFIG: Dict[str, Any] = {
         ],
         "descriptors": ["piece of", "chunk of", "son of a", ""],
     },
+    "user-name": "guest12345",
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -429,6 +430,12 @@ class ChatParser:
 
         if user in CONFIG["ignored"]:
             return cls.type_nop(content)
+
+        if content[1].lower().strip() == CONFIG["user-name"]:
+            if user == CONFIG["user-name"]:
+                return cls.type_nop(content)
+
+            return (guac_msg("chat", f"@{user} smh whattttttttttttt"),)
 
         command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
         _dad_joke_im: str = content[1].lower().split(" ", 1)[0]
