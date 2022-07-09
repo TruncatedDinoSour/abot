@@ -428,7 +428,7 @@ class ChatParser:
 
         user: str = content[0]
 
-        if user in CONFIG["ignored"]:
+        if user in CONFIG["ignored"] or user == CONFIG["bot-name"]:
             return cls.type_nop(content)
 
         if content[1].lower().strip() == CONFIG["user-name"]:
