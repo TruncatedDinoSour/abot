@@ -422,11 +422,9 @@ class ChatParser:
         if user in CONFIG["ignored"]:
             return cls.type_nop(content)
 
-        precontent: list[str] = content[1].split(" ", 1)
+        precontent: list[str] = list(map(html_unescape, content[1].split(" ", 1)))  # type: ignore
 
-        # i&#x27;m is i'm but I won't unescape it bc it's useless
-        # slowdown
-        if precontent[0].lower() in ("i&#x27;m", "im"):
+        if precontent[0].lower() in ("i'm", "im"):
             if len(precontent) < 2:
                 return cls.type_nop(content)
 
