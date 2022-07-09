@@ -417,12 +417,24 @@ class ChatParser:
         if len(content) > 3:
             return cls.type_nop(content)
 
-        if content[1].startswith(f"@{CONFIG['bot-name']} "):
-            user: str = content[0]
+        user: str = content[0]
 
-            if user in CONFIG["ignored"]:
+        if user in CONFIG["ignored"]:
+            return cls.type_nop(content)
+
+        precontent: list[str] = content[1].split(" ", 1)
+
+        # i&#x27;m is i'm but I won't unescape it bc it's useless
+        # slowdown
+        if precontent[0].lower() in ("i&#x27;m", "im"):
+            if len(precontent) < 2:
                 return cls.type_nop(content)
 
+            return (
+                guac_msg("chat", f"Hi {precontent[1]}, I'm {CONFIG['bot-name']} :)"),
+            )
+
+        if content[1].startswith(f"@{CONFIG['bot-name']} "):
             command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
 
             log(f"User {user!r} invoked {command!r}")
