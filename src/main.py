@@ -491,7 +491,7 @@ class ChatParser:
             AUTH["users"].remove(content[1])
 
         if RANDOM.randint(0, 200) == 69:
-            log(f"Saying goobye to {content[1]!r}")
+            log(f"Saying goodbye to {content[1]!r}")
             return (guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day"),)
 
         return cls.type_nop(content)
