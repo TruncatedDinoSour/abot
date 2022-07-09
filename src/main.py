@@ -8,6 +8,7 @@ import os
 import sys
 from html import unescape as html_unescape
 from secrets import SystemRandom
+from time import sleep
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from uuid import uuid4
 from warnings import filterwarnings as filter_warnings
@@ -543,8 +544,15 @@ if __name__ == "__main__":
 
     filter_warnings("error", category=Warning)
 
+    _count: int = 0
+
     while STATE["run"]:
         log("Running the bot")
         ret: int = asyncio.run(main())
+
+        if _count < 1:
+            log("Reconnecting after 30s")
+            sleep(30)
+            _count += 1
 
     sys.exit(ret)
