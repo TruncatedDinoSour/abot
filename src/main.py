@@ -422,18 +422,19 @@ class ChatParser:
         if user in CONFIG["ignored"]:
             return cls.type_nop(content)
 
-        precontent: list[str] = list(map(html_unescape, content[1].split(" ", 1)))  # type: ignore
+        command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
 
-        if precontent[0].lower() in ("i'm", "im"):
-            if len(precontent) < 2:
+        if content[1].lower().split(" ", 1)[0] in ("i&#x27;m", "im"):
+            if len(command) < 1:
                 return cls.type_nop(content)
 
             return (
-                guac_msg("chat", f"Hi {precontent[1]}, I'm {CONFIG['bot-name']} :)"),
+                guac_msg(
+                    "chat", f"Hi {' '.join(command)}, I'm {CONFIG['bot-name']} :)"
+                ),
             )
 
         if content[1].startswith(f"@{CONFIG['bot-name']} "):
-            command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
 
             log(f"User {user!r} invoked {command!r}")
 
