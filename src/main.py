@@ -55,6 +55,7 @@ CONFIG: Dict[str, Any] = {
         "descriptors": ["piece of", "chunk of", "son of a", ""],
     },
     "user-name": "guest12345",
+    "aliases": {},
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -72,7 +73,10 @@ AUTH: Dict[str, Any] = {"users": set(), "key": gen_key()}
 STATE: Dict[str, bool] = {"run": True}
 
 
-def paste(content: str) -> Union[str, Tuple[None, str]]:
+def paste(content: str, no_content_msg: str) -> Union[str, Tuple[None, str]]:
+    if not content:
+        return None, guac_msg("chat", no_content_msg)
+
     burl: str = "https://www.toptal.com/developers/hastebin"
 
     pid = requests.post(
@@ -81,7 +85,8 @@ def paste(content: str) -> Union[str, Tuple[None, str]]:
     )
 
     if pid.status_code != 200:
-        return (None, f"Failed to POST to pastebin (code {pid.status_code})")
+        log(f"Failed to POST to {burl!r}")
+        return None, f"Failed to POST to pastebin (code {pid.status_code})"
 
     return f"{burl}/{pid.json()['key']}.md"
 
@@ -273,6 +278,9 @@ class CommandParser:
                 ),
             )
 
+        if args[0] in CONFIG["notes"]:
+            return (guac_msg("chat", "Lol, nah, note {args[0]!r} already exists ;)"),)
+
         CONFIG["notes"][args[0]] = " ".join(args[1:])
 
         save_config()
@@ -283,7 +291,7 @@ class CommandParser:
         """Noauth command, gets a note
         Syntax: get <name>"""
 
-        if not len(args):
+        if not args:
             return (guac_msg("chat", "What note do you need lol"),)
 
         if args[0] not in CONFIG["notes"]:
@@ -296,7 +304,7 @@ class CommandParser:
         """Auth command, deletes a note
         Syntax: del <name>"""
 
-        if not len(args):
+        if not args:
             return (guac_msg("chat", "What note do you want me to rm -rf?"),)
 
         if args[0] not in CONFIG["notes"]:
@@ -314,10 +322,11 @@ class CommandParser:
 
         pid = paste(
             "\n".join(f"* {note}" for note in CONFIG["notes"]),
+            f"@{user} No notes to show you, want some tea though?",
         )
 
         if pid[0] is None:
-            guac_msg("chat", pid[1])
+            return (pid[1],)
 
         return (guac_msg("chat", f"@{user} Here's a list of notes: {pid}"),)
 
@@ -326,7 +335,7 @@ class CommandParser:
         """Auth command, ignores a user
         Syntax: ignore <user>"""
 
-        if not len(args):
+        if not args:
             return (guac_msg("chat", "Who do I even ignore lmao???????"),)
 
         if args[0] in AUTH["users"]:
@@ -343,14 +352,19 @@ class CommandParser:
         CONFIG["ignored"].append(args[0])
         save_config()
 
-        return (guac_msg("chat", f"@{args[0]}'s commands will be ignored from now on lmao, imagine"),)
+        return (
+            guac_msg(
+                "chat",
+                f"@{args[0]}'s commands will be ignored from now on lmao, imagine",
+            ),
+        )
 
     @staticmethod
     def cmd_acknowledge(user: str, args: List[str]) -> Tuple[str]:
         """Auth command, acknowledges a user
         Syntax: acknowledge <user>"""
 
-        if not len(args):
+        if not args:
             return (guac_msg("chat", "Hm? Who do you want me to acknowledge?"),)
 
         if args[0] not in CONFIG["ignored"]:
@@ -378,10 +392,11 @@ class CommandParser:
 
         pid = paste(
             "\n".join(f"* {ignored}" for ignored in CONFIG["ignored"]),
+            f"@{user} No users being ignored, which is a good thing I presume?",
         )
 
         if pid[0] is None:
-            guac_msg("chat", pid[1])
+            return (pid[1],)
 
         return (
             guac_msg("chat", f"@{user} Here's ur a list of ignored ppl heh: {pid}"),
@@ -392,7 +407,7 @@ class CommandParser:
         """Noauth command, insults a specified user
         Syntax: insult <user>"""
 
-        if not len(args):
+        if not args:
             return (guac_msg("chat", "I like.. need the <user> to insult them lmao"),)
 
         if args[0] == "me":
@@ -414,6 +429,76 @@ class CommandParser:
 
         reset_authkey()
         return (guac_msg("chat", f"@{user} the current auth key has been revoked"),)
+
+    @staticmethod
+    def cmd_alias(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, aliases a command to a command
+        Syntax: alias <name> <content...>"""
+
+        if len(args) < 2:
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{user} O, You made a mistake lmao, gimme the <name> AND the <content...>",
+                ),
+            )
+
+        if args[0] in CONFIG["aliases"]:
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{user} alias {args[0]!r} already exists :(",
+                ),
+            )
+
+        CONFIG["aliases"][args[0]] = " ".join(args[1:])
+        save_config()
+
+        return (guac_msg("chat", f"Alias {args[0]!r} saved"),)
+
+    @staticmethod
+    def cmd_unalias(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, unaliases an alias
+        Syntax: unalias <name>"""
+
+        if not args:
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{user} Hm? What do I need to unalias?",
+                ),
+            )
+
+        if args[0] not in CONFIG["aliases"]:
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{user} I'm like... 101% sure alias {args[0]!r} doesn't exist",
+                ),
+            )
+
+        del CONFIG["aliases"][args[0]]
+        save_config()
+
+        return (guac_msg("chat", f"Unaliased {args[0]!r}"),)
+
+    @staticmethod
+    def cmd_aliases(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, lists the aliases
+        Syntax: aliases"""
+
+        pid = paste(
+            "\n".join(
+                f"* {name} (@{CONFIG['bot-name']} {value})"
+                for name, value in CONFIG["aliases"].items()
+            ),
+            f"@{user} ...what do I even show you lol, there's no aliases",
+        )
+
+        if pid[0] is None:
+            return (pid[1],)
+
+        return (guac_msg("chat", f"@{user} Here's a list of your aliases: {pid}"),)
 
 
 class ChatParser:
@@ -471,6 +556,25 @@ class ChatParser:
             )
 
             if cmd_handler is None:
+                if command[0] in CONFIG["aliases"]:
+                    log(f"Found alias: {command[0]!r}")
+
+                    try:
+                        return cls.type_chat(
+                            [
+                                user,
+                                f"@{CONFIG['bot-name']} {CONFIG['aliases'][command[0]]}",
+                            ]
+                        )
+                    except RecursionError:
+                        log(f"Recursive alias detected: {command[0]!r}")
+
+                        return (
+                            guac_msg(
+                                "chat", "ZAMN! Your alias is *extremely* recursive"
+                            ),
+                        )
+
                 return (guac_msg("chat", f"Lmao what even is {command[0]!r}?"),)
 
             if (cmd_handler.__doc__ or "").strip().startswith("Noauth"):
