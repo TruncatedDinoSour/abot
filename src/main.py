@@ -550,7 +550,7 @@ if __name__ == "__main__":
         log("Running the bot")
         ret: int = asyncio.run(main())
 
-        if _count < 1:
+        if _count < 1 and STATE["run"]:
             log("Reconnecting after 30s")
             sleep(30)
             _count += 1
