@@ -457,12 +457,14 @@ class ChatParser:
                 ),
             )
 
-        if content[1].startswith(f"@{CONFIG['bot-name']} "):
+        _bot_mention: str = f"@{CONFIG['bot-name']}"
 
+        if content[1].startswith(_bot_mention) and not len(command):
+            log(f"{user!r} mentioned the bot without a command")
+            return (guac_msg("chat", f"@{user} Huh? What do you want lol"),)
+
+        if content[1].startswith(f"{_bot_mention} "):
             log(f"User {user!r} invoked {command!r}")
-
-            if not command:
-                return (guac_msg("chat", "Huh? What do you want lol"),)
 
             cmd_handler: Optional[Callable] = getattr(
                 CommandParser, f"cmd_{command[0]}", None
