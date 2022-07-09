@@ -406,6 +406,14 @@ class CommandParser:
             ),
         )
 
+    @staticmethod
+    def cmd_revokey(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, revoke current auth key
+        Syntax: revokey"""
+
+        reset_authkey()
+        return (guac_msg("chat", f"@{user} the current auth key has been revoked"),)
+
 
 class ChatParser:
     @staticmethod
