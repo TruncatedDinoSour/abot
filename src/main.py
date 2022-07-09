@@ -556,15 +556,12 @@ if __name__ == "__main__":
 
     filter_warnings("error", category=Warning)
 
-    _count: int = 0
-
     while STATE["run"]:
         log("Running the bot")
         ret: int = asyncio.run(main())
 
-        if _count < 1 and STATE["run"]:
+        if STATE["run"]:
             log("Reconnecting after 30s")
             sleep(30)
-            _count += 1
 
     sys.exit(ret)
