@@ -423,8 +423,16 @@ class ChatParser:
             return cls.type_nop(content)
 
         command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
+        _dad_joke_im: str = content[1].lower().split(" ", 1)[0]
 
-        if content[1].lower().split(" ", 1)[0] in ("i&#x27;m", "im"):
+        if (
+            _dad_joke_im in ("i&#x27;m", "im")
+            or _dad_joke_im == "i"
+            and command[0].lower() == "am"
+        ):
+            if command[0].lower() == "am":
+                command = command[1:]
+
             if len(command) < 1:
                 return cls.type_nop(content)
 
