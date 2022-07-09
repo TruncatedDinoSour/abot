@@ -343,7 +343,7 @@ class CommandParser:
         CONFIG["ignored"].append(args[0])
         save_config()
 
-        return (guac_msg("chat", f"@{args[0]}'s commands will be ignored from now on"),)
+        return (guac_msg("chat", f"@{args[0]}'s commands will be ignored from now on lmao, imagine"),)
 
     @staticmethod
     def cmd_acknowledge(user: str, args: List[str]) -> Tuple[str]:
@@ -367,7 +367,7 @@ class CommandParser:
         return (
             guac_msg(
                 "chat",
-                f"@{args[0]}'s commands will be not ignored from now on lmao, imagine",
+                f"@{args[0]}'s commands will be not ignored from now on :)",
             ),
         )
 
