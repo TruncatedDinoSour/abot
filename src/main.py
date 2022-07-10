@@ -413,6 +413,14 @@ class CommandParser:
         if args[0] == "me":
             args[0] = user
 
+        if args[0] == CONFIG["user-name"]:
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{args[0]} I would never insult you <3",
+                ),
+            )
+
         if args[0] == CONFIG["bot-name"]:
             return (
                 guac_msg(
