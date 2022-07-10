@@ -421,6 +421,14 @@ class CommandParser:
                 ),
             )
 
+        if args[0] == CONFIG["user-name"]:
+            return (
+                guac_msg(
+                    "chat",
+                    f"Come on, @{user}, {CONFIG['user-name']} is my owner, why would I insult them?",
+                ),
+            )
+
         return (
             guac_msg(
                 "chat",
