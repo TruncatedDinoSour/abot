@@ -597,7 +597,7 @@ class ChatParser:
                         return cls.type_chat(
                             [
                                 user,
-                                f"@{CONFIG['bot-name']} {CONFIG['aliases'][command[0]]}",
+                                f"@{CONFIG['bot-name']} {CONFIG['aliases'][command[0]]} {' '.join(command[1:])}".strip(),
                             ]
                         )
                     except RecursionError:
