@@ -15,6 +15,7 @@ from warnings import filterwarnings as filter_warnings
 
 import aiohttp  # type: ignore
 import requests  # type: ignore
+from numexpr import evaluate as math_eval  # type: ignore
 
 CONFIG_FILE: str = "config.json"
 CONFIG: Dict[str, Any] = {
@@ -523,6 +524,24 @@ class CommandParser:
             return (pid[1],)
 
         return (guac_msg("chat", f"@{user} Here's a list of your aliases: {pid}"),)
+
+    @staticmethod
+    def cmd_math(user: str, args: List[str]) -> Tuple[str]:
+        """Noauth command, executes a math expression
+        Syntax: math <expression>"""
+
+        if not args:
+            return (guac_msg("chat", f"@{user} You didn't specify an expression"),)
+
+        expr: str = " ".join(args)
+
+        try:
+            result = math_eval(expr, local_dict={}, global_dict={}).item()
+        except Exception as ex:
+            log(f"Math error ({expr!r}): {ex.__class__.__name__}: {ex}")
+            return (guac_msg("chat", f"@{user} Your math expression is invalid"),)
+
+        return (guac_msg("chat", f"@{user} {result}"),)
 
 
 class ChatParser:
