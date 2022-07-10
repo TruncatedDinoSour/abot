@@ -415,7 +415,10 @@ class CommandParser:
 
         if args[0] == CONFIG["bot-name"]:
             return (
-                guac_msg("chat", f"Hey, @{args[0]}, do you really think I suck? :("),
+                guac_msg(
+                    "chat",
+                    f"Hey, @{args[0]}, do you really think I suck? I have feelings too :(",
+                ),
             )
 
         return (
