@@ -525,17 +525,26 @@ class ChatParser:
         command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
         _dad_joke_im: str = content[1].lower().split(" ", 1)[0]
 
+        def _check_command() -> Optional[Tuple[str]]:
+            if not command:
+                return cls.type_nop(content)
+
+            return None
+
         if (
             _dad_joke_im in ("i&#x27;m", "im")
             or _dad_joke_im == "i"
             and command
             and command[0].lower() == "am"
         ):
+            if (_ret := _check_command()) is not None:
+                return _ret
+
             if command[0].lower() == "am":
                 command = command[1:]
 
-            if not command:
-                return cls.type_nop(content)
+                if (_ret := _check_command()) is not None:
+                    return _ret
 
             return (
                 guac_msg(
