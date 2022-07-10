@@ -417,7 +417,7 @@ class CommandParser:
             return (
                 guac_msg(
                     "chat",
-                    f"Hey, @{args[0]}, do you really think I suck? I have feelings too :(",
+                    f"Hey, @{user}, do you really think I suck? I have feelings too :(",
                 ),
             )
 
