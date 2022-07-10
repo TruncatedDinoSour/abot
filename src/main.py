@@ -528,12 +528,13 @@ class ChatParser:
         if (
             _dad_joke_im in ("i&#x27;m", "im")
             or _dad_joke_im == "i"
+            and command
             and command[0].lower() == "am"
         ):
             if command[0].lower() == "am":
                 command = command[1:]
 
-            if len(command) < 1:
+            if not command:
                 return cls.type_nop(content)
 
             return (
