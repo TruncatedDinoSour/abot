@@ -525,7 +525,7 @@ class CommandParser:
         return (guac_msg("chat", f"@{user} Here's a list of your aliases: {pid}"),)
 
 
-class ChatParser:
+class MessageParser:
     @staticmethod
     def type_nop(content: List[str]) -> Tuple[str]:
         return (guac_msg("nop"),)
@@ -696,8 +696,8 @@ async def main() -> int:
                 continue
 
             for cmsg in (
-                getattr(ChatParser, f"type_{parsed_msg[0]}", None)
-                or ChatParser.type_nop
+                getattr(MessageParser, f"type_{parsed_msg[0]}", None)
+                or MessageParser.type_nop
             )(parsed_msg[1:]):
                 await ws.send_str(cmsg)
 
