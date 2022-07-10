@@ -565,7 +565,7 @@ class ChatParser:
 
             return (guac_msg("chat", f"@{user} smh whattttttttttttt"),)
 
-        command: List[str] = list(map(html_unescape, " ".join(content[1:]).split()[1:]))  # type: ignore
+        command: List[str] = list(map(lambda s: html_unescape(s).replace("`", " "), " ".join(content[1:]).split()[1:]))  # type: ignore
         _dad_joke_im: str = content[1].lower().split(" ", 1)[0]
 
         def _check_command() -> Optional[Tuple[str]]:
