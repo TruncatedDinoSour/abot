@@ -538,6 +538,7 @@ class CommandParser:
             )
 
         cls.cmd_note(user, [f"forkie-{args[0]}", " ".join(args[1:])])
+        cls.cmd_ignore(user, [args[0]])
 
         return (
             guac_msg(
