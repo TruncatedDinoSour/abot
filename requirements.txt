@@ -2,4 +2,3 @@ asyncio
 uuid
 aiohttp
 requests
-numexpr
