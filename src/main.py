@@ -17,7 +17,7 @@ import aiohttp  # type: ignore
 import requests  # type: ignore
 
 CONFIG_FILE: str = "config.json"
-CONFIG: Dict[str, Union[int, str, list, dict]] = {
+CONFIG: Dict[str, Any] = {
     "max-cache": 10000,
     "bot-name": "example-abot",
     "vm": "vm0",
@@ -678,6 +678,11 @@ class MessageParser:
 async def main() -> int:
     """Entry/main function"""
 
+    _vm: str = CONFIG["vm"]
+
+    if len(sys.argv) >= 2:
+        _vm = sys.argv[1].strip()
+
     if not os.path.isfile(CONFIG_FILE):
         log(f"Making default config in {CONFIG_FILE!r}")
 
@@ -688,7 +693,7 @@ async def main() -> int:
             CONFIG.update(json.load(cfg))
 
     s: aiohttp.ClientSession = aiohttp.ClientSession()
-    url: str = f"wss://computernewb.com/collab-vm/{CONFIG['vm']}/"
+    url: str = f"wss://computernewb.com/collab-vm/{_vm}/"
 
     log(f"Connecting to {url!r}")
 
@@ -700,7 +705,7 @@ async def main() -> int:
         autoping=False,
     ) as ws:
         await ws.send_str(guac_msg("rename", CONFIG["bot-name"]))
-        await ws.send_str(guac_msg("connect", CONFIG["vm"]))
+        await ws.send_str(guac_msg("connect", _vm))
 
         log("Connected")
 
