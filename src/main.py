@@ -17,7 +17,7 @@ import aiohttp  # type: ignore
 import requests  # type: ignore
 
 CONFIG_FILE: str = "config.json"
-CONFIG: Dict[str, Any] = {
+CONFIG: Dict[str, Union[int, str, list, dict]] = {
     "max-cache": 10000,
     "bot-name": "example-abot",
     "vm": "vm0",
