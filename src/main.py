@@ -524,6 +524,28 @@ class CommandParser:
 
         return (guac_msg("chat", f"@{user} Here's a list of your aliases: {pid}"),)
 
+    @classmethod
+    def cmd_report(cls, user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, reports a user
+        Syntax: report <user> <reason>"""
+
+        if len(args) < 2:
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{user} Who and for what do I report to admins/mods?",
+                ),
+            )
+
+        cls.cmd_note(user, [f"forkie-{args[0]}", " ".join(args[1:])])
+
+        return (
+            guac_msg(
+                "chat",
+                f"Reported user @{args[0]} to admins/mods, imagine getting banned :skull:",
+            ),
+        )
+
 
 class MessageParser:
     @staticmethod
