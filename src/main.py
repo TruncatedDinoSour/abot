@@ -678,11 +678,6 @@ class MessageParser:
 async def main() -> int:
     """Entry/main function"""
 
-    _vm: str = CONFIG["vm"]
-
-    if len(sys.argv) >= 2:
-        _vm = sys.argv[1].strip()
-
     if not os.path.isfile(CONFIG_FILE):
         log(f"Making default config in {CONFIG_FILE!r}")
 
@@ -691,6 +686,13 @@ async def main() -> int:
     else:
         with open(CONFIG_FILE, "r") as cfg:
             CONFIG.update(json.load(cfg))
+
+    _vm: str = CONFIG["vm"]
+
+    if len(sys.argv) >= 2:
+        _vm = sys.argv[1]
+
+    _vm = _vm.strip()
 
     s: aiohttp.ClientSession = aiohttp.ClientSession()
     url: str = f"wss://computernewb.com/collab-vm/{_vm}/"
