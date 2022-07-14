@@ -555,7 +555,7 @@ class MessageParser:
 
     @classmethod
     def type_chat(cls, content: List[str]) -> Tuple[str]:
-        if len(content) > 3 or not content[0].strip():
+        if len(content) > 3 or len(" ".join(content[1:])) > 78 or not content[0].strip():
             return cls.type_nop(content)
 
         user: str = content[0]
