@@ -448,7 +448,7 @@ class CommandParser:
 
     @staticmethod
     def cmd_revokey(user: str, args: List[str]) -> Tuple[str]:
-        """Auth command, revoke current auth key
+        """Noauth command, revoke current auth key
         Syntax: revokey"""
 
         reset_authkey()
