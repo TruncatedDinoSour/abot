@@ -593,10 +593,16 @@ class MessageParser:
                 if (_ret := _check_command()) is not None:
                     return _ret
 
+            _dad_joke_who: str = " ".join(command)
+            _special: tuple[str, str] = (CONFIG["bot-name"], CONFIG["user-name"])
+
+            if (
+                _dad_joke_who in _special or _dad_joke_who[1:] in _special
+            ) and user != _dad_joke_who.strip():
+                return (guac_msg("chat", f"@{user} Yeah I doubt lmao"),)
+
             return (
-                guac_msg(
-                    "chat", f"Hi {' '.join(command)}, I'm {CONFIG['bot-name']} :)"
-                ),
+                guac_msg("chat", f"Hi {_dad_joke_who}, I'm {CONFIG['bot-name']} :)"),
             )
 
         _bot_mention: str = f"@{CONFIG['bot-name']}"
