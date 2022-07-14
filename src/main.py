@@ -563,10 +563,14 @@ class MessageParser:
         if user in CONFIG["ignored"] or user == CONFIG["bot-name"]:
             return cls.type_nop(content)
 
-        if content[1].lower().strip() == CONFIG["user-name"]:
+        if content[1].lower().strip() in (
+            f"@{CONFIG['user-name']}",
+            CONFIG["user-name"],
+        ):
             if user == CONFIG["user-name"]:
                 return cls.type_nop(content)
 
+            log(f"{user!r} mentioned the owner without any conrext")
             return (guac_msg("chat", f"@{user} smh whattttttttttttt"),)
 
         command: List[str] = list(map(lambda s: html_unescape(s).replace("`", " "), " ".join(content[1:]).split()[1:]))  # type: ignore
@@ -599,8 +603,12 @@ class MessageParser:
             if (
                 _dad_joke_who in _special or _dad_joke_who[1:] in _special
             ) and user != _dad_joke_who.strip():
+                log(
+                    f"User {user!r} said they're from special users ({_dad_joke_who!r})"
+                )
                 return (guac_msg("chat", f"@{user} Yeah I doubt lmao"),)
 
+            log(f"User {user!r} invoked a dad joke: {_dad_joke_who!r}")
             return (
                 guac_msg("chat", f"Hi {_dad_joke_who}, I'm {CONFIG['bot-name']} :)"),
             )
