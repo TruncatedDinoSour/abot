@@ -278,12 +278,13 @@ class CommandParser:
                 ),
             )
 
-        if args[0] in CONFIG["notes"]:
-            return (guac_msg("chat", "Lol, nah, note {args[0]!r} already exists ;)"),)
-
         CONFIG["notes"][args[0]] = " ".join(args[1:])
 
         save_config()
+
+        if args[0] in CONFIG["notes"]:
+            return (guac_msg("chat", f"Lol, done, note {args[0]!r} edited ;)"),)
+
         return (guac_msg("chat", f"Note {args[0]!r} saved <3"),)
 
     @staticmethod
@@ -555,7 +556,11 @@ class MessageParser:
 
     @classmethod
     def type_chat(cls, content: List[str]) -> Tuple[str]:
-        if len(content) > 3 or len(" ".join(content[1:])) > 78 or not content[0].strip():
+        if (
+            len(content) > 3
+            or len(" ".join(content[1:])) > (100 + len(CONFIG["bot-name"]))
+            or not content[0].strip()
+        ):
             return cls.type_nop(content)
 
         user: str = content[0]
