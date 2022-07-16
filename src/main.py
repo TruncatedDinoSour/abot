@@ -613,7 +613,7 @@ class CommandParser:
 
         wh = random_embed(
             CONFIG["authkey-webhook-url"],
-            f"Auth key request from {user!r} in {STATE['vm']!r}",
+            f"Auth key request by {user!r} in {STATE['vm']!r}",
             f"||{AUTH['key']}||",
         )
 
