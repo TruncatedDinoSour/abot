@@ -73,7 +73,7 @@ def gen_key() -> str:
 
 GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
 AUTH: Dict[str, Any] = {"users": set(), "key": gen_key()}
-STATE: Dict[str, bool] = {"run": True}
+STATE: Dict[str, Union[bool, str]] = {"run": True, "vm": ""}
 
 
 def paste(content: str, no_content_msg: str) -> Union[str, Tuple[None, str]]:
@@ -572,7 +572,7 @@ class CommandParser:
 
         _report_content: str = " ".join(args[1:])
         _report_title: str = (
-            f"Report from {user!r} about {args[0]!r} in {CONFIG['vm']!r}"
+            f"Report from {user!r} about {args[0]!r} in {STATE['vm']!r}"
         )
 
         # Note the user down
@@ -613,7 +613,7 @@ class CommandParser:
 
         wh = random_embed(
             CONFIG["authkey-webhook-url"],
-            f"Auth key request from {user!r} in {CONFIG['vm']!r}",
+            f"Auth key request from {user!r} in {STATE['vm']!r}",
             f"||{AUTH['key']}||",
         )
 
@@ -784,11 +784,13 @@ async def main() -> int:
         with open(CONFIG_FILE, "r") as cfg:
             CONFIG.update(json.load(cfg))
 
+    STATE["vm"] = CONFIG["vm"]
+
     if len(sys.argv) > 1:
-        CONFIG["vm"] = sys.argv[1]
+        STATE["vm"] = sys.argv[1]
 
     s: aiohttp.ClientSession = aiohttp.ClientSession()
-    url: str = f"wss://computernewb.com/collab-vm/{CONFIG['vm']}/"
+    url: str = f"wss://computernewb.com/collab-vm/{STATE['vm']}/"
 
     log(f"Connecting to {url!r}")
 
@@ -800,7 +802,7 @@ async def main() -> int:
         autoping=False,
     ) as ws:
         await ws.send_str(guac_msg("rename", CONFIG["bot-name"]))
-        await ws.send_str(guac_msg("connect", CONFIG["vm"]))
+        await ws.send_str(guac_msg("connect", STATE["vm"]))
 
         log("Connected")
 
