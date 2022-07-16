@@ -585,7 +585,7 @@ class CommandParser:
         wh = random_embed(
             CONFIG["report-webhook-url"],
             _report_title,
-            f"Reason: `{repr(_report_content)[1:-1]}`",
+            f"Reason: `{_report_content.replace('`', '  ')}`",
         )
         log(f"{_report_title}: {wh.execute()}")
 
