@@ -14,6 +14,7 @@ from uuid import uuid4
 from warnings import filterwarnings as filter_warnings
 
 import aiohttp  # type: ignore
+import discord_webhook as dw  # type: ignore
 import requests  # type: ignore
 
 CONFIG_FILE: str = "config.json"
@@ -56,6 +57,8 @@ CONFIG: Dict[str, Any] = {
     },
     "user-name": "guest12345",
     "aliases": {},
+    "report-webhook-url": "",
+    "authkey-webhook-url": "",
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -94,6 +97,27 @@ def paste(content: str, no_content_msg: str) -> Union[str, Tuple[None, str]]:
 def reset_authkey() -> None:
     AUTH["key"] = gen_key()
     log(f"New auth key: {AUTH['key']}")
+
+
+def create_wh(url: str) -> dw.DiscordWebhook:
+    return dw.DiscordWebhook(
+        url=url,
+        rate_limit_retry=True,
+    )
+
+
+def random_embed(url: str, title: str, content: str) -> dw.DiscordWebhook:
+    wh = create_wh(url)
+
+    wh.add_embed(
+        dw.DiscordEmbed(
+            title=title,
+            description=content,
+            color="%06x" % RANDOM.randint(0, 0xFFFFFF),
+        )
+    )
+
+    return wh
 
 
 def save_config() -> None:
@@ -530,6 +554,14 @@ class CommandParser:
         """Auth command, reports a user
         Syntax: report <user> <reason>"""
 
+        if not CONFIG["report-webhook-url"].strip():
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{user} please ask the owner ({CONFIG['user-name']}) to set reports up",
+                ),
+            )
+
         if len(args) < 2:
             return (
                 guac_msg(
@@ -538,13 +570,59 @@ class CommandParser:
                 ),
             )
 
-        cls.cmd_note(user, [f"forkie-{args[0]}", " ".join(args[1:])])
+        _report_content: str = " ".join(args[1:])
+        _report_title: str = (
+            f"Report from {user!r} about {args[0]!r} in {CONFIG['vm']!r}"
+        )
+
+        # Note the user down
+
+        cls.cmd_note(user, [f"forkie-{args[0]}", _report_content])
         cls.cmd_ignore(user, [args[0]])
+
+        # Send off the report
+
+        wh = random_embed(
+            CONFIG["report-webhook-url"],
+            _report_title,
+            f"Reason: `{repr(_report_content)[1:-1]}`",
+        )
+        log(f"{_report_title}: {wh.execute()}")
+
+        # Respond to user
 
         return (
             guac_msg(
                 "chat",
                 f"Reported user @{args[0]} to admins/mods, imagine getting banned :skull:",
+            ),
+        )
+
+    @staticmethod
+    def cmd_sendkey(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, sends the auth key to the specified hook
+        Syntax: sendkey"""
+
+        if not CONFIG["authkey-webhook-url"].strip():
+            return (
+                guac_msg(
+                    "chat",
+                    f"@{user} the config isn't set up properly to use sendkey, you forgot a thing",
+                ),
+            )
+
+        wh = random_embed(
+            CONFIG["authkey-webhook-url"],
+            f"Auth key request from {user!r} in {CONFIG['vm']!r}",
+            f"||{AUTH['key']}||",
+        )
+
+        log(f"Sent key to discord webhook: {wh.execute()}")
+
+        return (
+            guac_msg(
+                "chat",
+                f"@{user} the key has been sent",
             ),
         )
 
@@ -706,15 +784,11 @@ async def main() -> int:
         with open(CONFIG_FILE, "r") as cfg:
             CONFIG.update(json.load(cfg))
 
-    _vm: str = CONFIG["vm"]
-
-    if len(sys.argv) >= 2:
-        _vm = sys.argv[1]
-
-    _vm = _vm.strip()
+    if len(sys.argv) > 1:
+        CONFIG["vm"] = sys.argv[1]
 
     s: aiohttp.ClientSession = aiohttp.ClientSession()
-    url: str = f"wss://computernewb.com/collab-vm/{_vm}/"
+    url: str = f"wss://computernewb.com/collab-vm/{CONFIG['vm']}/"
 
     log(f"Connecting to {url!r}")
 
@@ -726,7 +800,7 @@ async def main() -> int:
         autoping=False,
     ) as ws:
         await ws.send_str(guac_msg("rename", CONFIG["bot-name"]))
-        await ws.send_str(guac_msg("connect", _vm))
+        await ws.send_str(guac_msg("connect", CONFIG["vm"]))
 
         log("Connected")
 
