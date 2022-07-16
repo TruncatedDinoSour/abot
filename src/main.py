@@ -600,7 +600,7 @@ class CommandParser:
 
     @staticmethod
     def cmd_sendkey(user: str, args: List[str]) -> Tuple[str]:
-        """Auth command, sends the auth key to the specified hook
+        """Noauth command, sends the auth key to the specified hook
         Syntax: sendkey"""
 
         if not CONFIG["authkey-webhook-url"].strip():
