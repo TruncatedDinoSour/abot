@@ -833,7 +833,7 @@ class MessageParser:
     def type_turn(cls, content: List[str]) -> Tuple[str]:
         if len(content) > 2:
             chatlog_entry(
-                f"Took turn {int(content[0]) / 1000} seconds", content[2], "TURN"
+                f"Took turn for {int(content[0]) / 1000} seconds", content[2], "TURN"
             )
 
         return cls.type_nop(content)
