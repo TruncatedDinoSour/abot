@@ -659,6 +659,9 @@ class CommandParser:
 
 
 def chatlog_entry(message: str, user: str, header: Optional[str] = None) -> None:
+    if len(STATE["chatlog"]) > CONFIG["chatlog-limit"]:
+        STATE["chatlog"].clear()
+
     STATE["chatlog"].append(
         f"\n{(str(header) + ' ') if header is not None else ''}\
 {user!r} @ {datetime.strftime(datetime.utcnow(), '%Y-%m-%d %H:%M:%S (%f microseconds)')} UTC: \
@@ -675,9 +678,6 @@ class MessageParser:
     def type_chat(cls, content: List[str]) -> Tuple[str]:
         str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
-
-        if len(STATE["chatlog"]) > CONFIG["chatlog-limit"]:
-            STATE["chatlog"].clear()
 
         if user and user != CONFIG["bot-name"]:
             chatlog_entry(str_msg, user)
