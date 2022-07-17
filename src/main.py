@@ -849,9 +849,9 @@ class MessageParser:
         if not content[1].startswith("scrot"):
             chatlog_entry("Joined", content[1], "JOIN")
 
-        if RANDOM.randint(0, 1000) == 420:
-            log(f"Welcoming {content[1]!r}")
-            return (guac_msg("chat", f"Welcome, {content[1]!r}. How are you?"),)
+            if RANDOM.randint(0, 1000) == 420:
+                log(f"Welcoming {content[1]!r}")
+                return (guac_msg("chat", f"Welcome, {content[1]!r}. How are you?"),)
 
         return cls.type_nop(content)
 
@@ -860,13 +860,13 @@ class MessageParser:
         if not content[1].startswith("scrot"):
             chatlog_entry("Left", content[1], "LEAVE")
 
-        if content[1] in AUTH["users"]:
-            log(f"Logging {content[1]!r} out")
-            AUTH["users"].remove(content[1])
+            if content[1] in AUTH["users"]:
+                log(f"Logging {content[1]!r} out")
+                AUTH["users"].remove(content[1])
 
-        if RANDOM.randint(0, 1000) == 69:
-            log(f"Saying goodbye to {content[1]!r}")
-            return (guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day"),)
+            if RANDOM.randint(0, 1000) == 69:
+                log(f"Saying goodbye to {content[1]!r}")
+                return (guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day"),)
 
         return cls.type_nop(content)
 
