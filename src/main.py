@@ -710,7 +710,7 @@ class CommandParser:
         """Auth command, dumps current chatlog
         Syntax: dumplog"""
 
-        _dumplog_filename: str = dump_log(generate_time_str())
+        _dumplog_filename: str = dump_log(f"{user} {generate_time_str()}")
 
         return (
             guac_msg(
