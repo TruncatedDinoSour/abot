@@ -6,10 +6,11 @@ import asyncio
 import json
 import os
 import sys
-from datetime import datetime
+import time
+from datetime import datetime, timezone
 from html import unescape as html_unescape
 from secrets import SystemRandom
-from time import sleep
+from string import punctuation as special_characters
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from uuid import uuid4
 from warnings import filterwarnings as filter_warnings
@@ -61,6 +62,8 @@ CONFIG: Dict[str, Any] = {
     "report-webhook-url": "",
     "authkey-webhook-url": "",
     "chatlog-limit": 500,
+    "logs-dir": "logs",
+    "autodump-chatlogs": True,
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -221,6 +224,51 @@ def unguac_msg(msg: str) -> Optional[List[str]]:
     _cache[msg] = result
 
     return result
+
+
+def dump_log(time: str) -> str:
+    if not os.path.exists(CONFIG["logs-dir"]):
+        log(f"Making {CONFIG['logs-dir']!r} directory")
+        os.mkdir(CONFIG["logs-dir"])
+
+    _log_file: str = os.path.join(
+        CONFIG["logs-dir"],
+        f"{''.join(c.replace(' ', '-') for c in time if c not in special_characters)}.log",
+    )
+
+    log(f"Dumping chatlog to {_log_file!r}")
+
+    with open(
+        _log_file,
+        "w",
+    ) as chatlog:
+        chatlog.write("\n".join(STATE["chatlog"]))
+
+    return chatlog.name
+
+
+def generate_time_str() -> str:
+    _utc: datetime = datetime.now(tz=timezone.utc)
+
+    return datetime.strftime(
+        _utc, f"{_utc.timestamp()} UNIX / %Y-%m-%d %H:%M:%S (%f microseconds) UTC"
+    )
+
+
+def chatlog_entry(message: str, user: str, header: Optional[str] = None) -> None:
+    _time: str = generate_time_str()
+
+    if len(STATE["chatlog"]) > CONFIG["chatlog-limit"]:
+        if CONFIG["autodump-chatlog"]:
+            dump_log(_time)
+
+        STATE["chatlog"].clear()
+
+    STATE["chatlog"].append(
+        f"\n{(str(header) + ' ') if header is not None else ''}\
+{user!r} @ {_time}: \
+{message}"
+    )
 
 
 class CommandParser:
@@ -657,16 +705,19 @@ class CommandParser:
             ),
         )
 
+    @staticmethod
+    def cmd_dumplog(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, dumps current chatlog
+        Syntax: dumplog"""
 
-def chatlog_entry(message: str, user: str, header: Optional[str] = None) -> None:
-    if len(STATE["chatlog"]) > CONFIG["chatlog-limit"]:
-        STATE["chatlog"].clear()
+        _dumplog_filename: str = dump_log(generate_time_str())
 
-    STATE["chatlog"].append(
-        f"\n{(str(header) + ' ') if header is not None else ''}\
-{user!r} @ {datetime.strftime(datetime.utcnow(), '%Y-%m-%d %H:%M:%S (%f microseconds)')} UTC: \
-{message}"
-    )
+        return (
+            guac_msg(
+                "chat",
+                f"@{user} Dumped to {_dumplog_filename}",
+            ),
+        )
 
 
 class MessageParser:
@@ -925,6 +976,6 @@ if __name__ == "__main__":
 
         if STATE["run"]:
             log("Reconnecting after 30s")
-            sleep(30)
+            time.sleep(30)
 
     sys.exit(ret)
