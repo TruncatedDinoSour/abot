@@ -3,6 +3,7 @@
 """Abot for collabvm"""
 
 import asyncio
+import datetime
 import json
 import os
 import sys
@@ -109,10 +110,21 @@ def create_wh(url: str) -> dw.DiscordWebhook:
 def random_embed(url: str, title: str, content: str) -> dw.DiscordWebhook:
     wh = create_wh(url)
 
+    _utc_time: datetime.datetime = datetime.datetime.utcnow()
+    _time_format: str = "%Y-%m-%d-%H-%M"
+    _delta: datetime.timedelta = datetime.timedelta(hours=0, minutes=5)
+
+    def _format_time(time: datetime.datetime) -> str:
+        return datetime.datetime.strftime(time, _time_format)
+
+    _from: str = _format_time(_utc_time - _delta)
+    _to: str = _format_time(_utc_time)
+
     wh.add_embed(
         dw.DiscordEmbed(
             title=title,
-            description=content,
+            description=f"""{content}
+Chatlog: https://elijah-dev.tk/pullcvmlog.php?from={_from}&to={_to}&vm={str(STATE['vm']).upper()}""",
             color="%06x" % RANDOM.randint(0, 0xFFFFFF),
         )
     )
