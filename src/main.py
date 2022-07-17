@@ -789,7 +789,8 @@ class MessageParser:
 
     @classmethod
     def type_adduser(cls, content: List[str]) -> Tuple[str]:
-        chatlog_entry("Joined", content[1], "JOIN")
+        if not content[1].startswith("guest"):
+            chatlog_entry("Joined", content[1], "JOIN")
 
         if RANDOM.randint(0, 1000) == 420:
             log(f"Welcoming {content[1]!r}")
@@ -799,7 +800,8 @@ class MessageParser:
 
     @classmethod
     def type_remuser(cls, content: List[str]) -> Tuple[str]:
-        chatlog_entry("Left", content[1], "LEAVE")
+        if not content[1].startswith("guest"):
+            chatlog_entry("Left", content[1], "LEAVE")
 
         if content[1] in AUTH["users"]:
             log(f"Logging {content[1]!r} out")
