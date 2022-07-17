@@ -259,7 +259,7 @@ def chatlog_entry(message: str, user: str, header: Optional[str] = None) -> None
     _time: str = generate_time_str()
 
     if len(STATE["chatlog"]) > CONFIG["chatlog-limit"]:
-        if CONFIG["autodump-chatlog"]:
+        if CONFIG["autodump-chatlogs"]:
             dump_log(_time)
 
         STATE["chatlog"].clear()
@@ -959,6 +959,9 @@ async def main() -> int:
                 break
 
     save_config()
+
+    if CONFIG["autodump-chatlogs"]:
+        log(f"Dumped log: {dump_log(generate_time_str())!r}")
 
     await s.close()
 
