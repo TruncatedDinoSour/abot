@@ -233,7 +233,7 @@ def dump_log(time: str) -> str:
 
     _log_file: str = os.path.join(
         CONFIG["logs-dir"],
-        f"{''.join(c.replace(' ', '-') for c in time if c not in special_characters)}.log",
+        f"{STATE['vm']}-{''.join(c.replace(' ', '-') for c in time if c not in special_characters)}.log",
     )
 
     log(f"Dumping chatlog to {_log_file!r}")
