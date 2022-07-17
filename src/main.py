@@ -60,7 +60,7 @@ CONFIG: Dict[str, Any] = {
     "aliases": {},
     "report-webhook-url": "",
     "authkey-webhook-url": "",
-    "chatlog-limit": 150,
+    "chatlog-limit": 500,
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -76,6 +76,12 @@ def gen_key() -> str:
 GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
 AUTH: Dict[str, Any] = {"users": set(), "key": gen_key()}
 STATE: Dict[str, Any] = {"run": True, "vm": "", "chatlog": []}
+VOTE_STATES: Dict[int, str] = {
+    0: "Vote started",
+    1: "Someone voted/removed their vote",
+    2: "Reset vote ended",
+    3: "Timeout for reset",
+}
 
 
 def paste(content: str, no_content_msg: str) -> Union[str, Tuple[None, str]]:
@@ -830,6 +836,15 @@ class MessageParser:
                 f"Took turn {int(content[0]) / 1000} seconds", content[2], "TURN"
             )
 
+        return cls.type_nop(content)
+
+    @classmethod
+    def type_vote(cls, content: List[str]) -> Tuple[str]:
+        chatlog_entry(
+            f"{VOTE_STATES.get(int(content[0])) or 'Unknown vote type'}: {' '.join(content)}",
+            "Server",
+            "RESET",
+        )
         return cls.type_nop(content)
 
 
