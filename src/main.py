@@ -273,22 +273,22 @@ def chatlog_entry(message: str, user: str, header: Optional[str] = None) -> None
 
 class CommandParser:
     @staticmethod
-    def cmd_hi(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_hi(user: str, args: List[str]) -> str:
         """Noauth command, says hello to the user
         Syntax: hi"""
 
-        return (guac_msg("chat", f"Hello, @{user} :}}"),)
+        return guac_msg("chat", f"Hello, @{user} :}}")
 
     @staticmethod
-    def cmd_log(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_log(user: str, args: List[str]) -> str:
         """Noauth command, authenticates the user
         Syntax: log <me|user> <in|out> <auth key>"""
 
         if len(args) < 3:
-            return (guac_msg("chat", "Uhh, I need <me|user> <in|out> <auth key>"),)
+            return guac_msg("chat", "Uhh, I need <me|user> <in|out> <auth key>")
 
         if args[-1] != AUTH["key"]:
-            return (guac_msg("chat", f"@{user} your auth key is invalid lmao"),)
+            return guac_msg("chat", f"@{user} your auth key is invalid lmao")
 
         reset_authkey()
 
@@ -297,68 +297,66 @@ class CommandParser:
             auth_user = user
 
         if auth_user in CONFIG["ignored"]:
-            return (guac_msg("chat", f"{auth_user!r} is ignored for a reason :|"),)
+            return guac_msg("chat", f"{auth_user!r} is ignored for a reason :|")
 
         if args[1] == "in":
             if auth_user in AUTH["users"]:
-                return (guac_msg("chat", f"{auth_user} is already authenticated"),)
+                return guac_msg("chat", f"{auth_user} is already authenticated")
 
             AUTH["users"].add(auth_user)
         elif args[1] == "out":
             if auth_user not in AUTH["users"]:
-                return (guac_msg("chat", f"{auth_user} is not authenticated"),)
+                return guac_msg("chat", f"{auth_user} is not authenticated")
 
             AUTH["users"].add(auth_user)
         else:
-            return (guac_msg("chat", f"How do I log {args[1]!r} a person out???"),)
+            return guac_msg("chat", f"How do I log {args[1]!r} a person out???")
 
-        return (guac_msg("chat", f"@{auth_user} you have been logged {args[1]}"),)
+        return guac_msg("chat", f"@{auth_user} you have been logged {args[1]}")
 
     @staticmethod
-    def cmd_getkey(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_getkey(user: str, args: List[str]) -> str:
         """Noauth command, authenticates the user
         Syntax: getkey"""
 
         log(f"{user!r} requested auth key: {AUTH['key']}")
-        return (guac_msg("chat", f"@{user} check the console for the key"),)
+        return guac_msg("chat", f"@{user} check the console for the key")
 
     @staticmethod
-    def cmd_whoami(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_whoami(user: str, args: List[str]) -> str:
         """Auth command, authenticates the user
         Syntax: getkey"""
 
-        return (guac_msg("chat", f"You are {user} :D"),)
+        return guac_msg("chat", f"You are {user} :D")
 
     @staticmethod
-    def cmd_die(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_die(user: str, args: List[str]) -> str:
         """Auth command, exists the server
         Syntax: die"""
 
         STATE["run"] = False
 
         if CONFIG["bye-message"]:
-            return (guac_msg("chat", CONFIG["bye-message"]),)
+            return guac_msg("chat", CONFIG["bye-message"])
 
-        return (guac_msg("nop"),)
+        return guac_msg("nop")
 
     @staticmethod
-    def cmd_savecfg(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_savecfg(user: str, args: List[str]) -> str:
         """Auth command, saves the config
         Syntax: savecfg"""
 
         save_config()
-        return (guac_msg("chat", f"{CONFIG_FILE!r} saved"),)
+        return guac_msg("chat", f"{CONFIG_FILE!r} saved")
 
     @staticmethod
-    def cmd_note(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_note(user: str, args: List[str]) -> str:
         """Auth command, makes a note and then saves the config
         Syntax: note <name> <content...>"""
 
         if len(args) < 2:
-            return (
-                guac_msg(
-                    "chat", "Huh? I kinda need the <name> and the <conrent> of the note"
-                ),
+            return guac_msg(
+                "chat", "Huh? I kinda need the <name> and the <conrent> of the note"
             )
 
         CONFIG["notes"][args[0]] = " ".join(args[1:])
@@ -366,41 +364,41 @@ class CommandParser:
         save_config()
 
         if args[0] in CONFIG["notes"]:
-            return (guac_msg("chat", f"Lol, done, note {args[0]!r} edited ;)"),)
+            return guac_msg("chat", f"Lol, done, note {args[0]!r} edited ;)")
 
-        return (guac_msg("chat", f"Note {args[0]!r} saved <3"),)
+        return guac_msg("chat", f"Note {args[0]!r} saved <3")
 
     @staticmethod
-    def cmd_get(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_get(user: str, args: List[str]) -> str:
         """Noauth command, gets a note
         Syntax: get <name>"""
 
         if not args:
-            return (guac_msg("chat", "What note do you need lol"),)
+            return guac_msg("chat", "What note do you need lol")
 
         if args[0] not in CONFIG["notes"]:
-            return (guac_msg("chat", "That's not a note... zamn"),)
+            return guac_msg("chat", "That's not a note... zamn")
 
-        return (guac_msg("chat", f"> {CONFIG['notes'][args[0]]}"),)
+        return guac_msg("chat", f"> {CONFIG['notes'][args[0]]}")
 
     @staticmethod
-    def cmd_del(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_del(user: str, args: List[str]) -> str:
         """Auth command, deletes a note
         Syntax: del <name>"""
 
         if not args:
-            return (guac_msg("chat", "What note do you want me to rm -rf?"),)
+            return guac_msg("chat", "What note do you want me to rm -rf?")
 
         if args[0] not in CONFIG["notes"]:
-            return (guac_msg("chat", "That's not note, such shame"),)
+            return guac_msg("chat", "That's not note, such shame")
 
         del CONFIG["notes"][args[0]]
 
         save_config()
-        return (guac_msg("chat", f"Note {args[0]!r} deleted, sad to see it go kinda"),)
+        return guac_msg("chat", f"Note {args[0]!r} deleted, sad to see it go kinda")
 
     @staticmethod
-    def cmd_notes(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_notes(user: str, args: List[str]) -> str:
         """Auth command, lists the notes
         Syntax: notes"""
 
@@ -410,67 +408,59 @@ class CommandParser:
         )
 
         if pid[0] is None:
-            return (pid[1],)
+            return pid[1]
 
-        return (guac_msg("chat", f"@{user} Here's a list of notes: {pid}"),)
+        return guac_msg("chat", f"@{user} Here's a list of notes: {pid}")
 
     @staticmethod
-    def cmd_ignore(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_ignore(user: str, args: List[str]) -> str:
         """Auth command, ignores a user
         Syntax: ignore <user>"""
 
         if not args:
-            return (guac_msg("chat", "Who do I even ignore lmao???????"),)
+            return guac_msg("chat", "Who do I even ignore lmao???????")
 
         if args[0] in AUTH["users"]:
-            return (
-                guac_msg(
-                    "chat",
-                    "Yeah... no, I don't think ignoring authenticated users is a good idea",
-                ),
+            return guac_msg(
+                "chat",
+                "Yeah... no, I don't think ignoring authenticated users is a good idea",
             )
 
         if args[0] in CONFIG["ignored"]:
-            return (guac_msg("chat", "You want me to ignore an already ignored user?"),)
+            return guac_msg("chat", "You want me to ignore an already ignored user?")
 
         CONFIG["ignored"].append(args[0])
         save_config()
 
-        return (
-            guac_msg(
-                "chat",
-                f"@{args[0]}'s commands will be ignored from now on lmao, imagine",
-            ),
+        return guac_msg(
+            "chat",
+            f"@{args[0]}'s commands will be ignored from now on lmao, imagine",
         )
 
     @staticmethod
-    def cmd_acknowledge(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_acknowledge(user: str, args: List[str]) -> str:
         """Auth command, acknowledges a user
         Syntax: acknowledge <user>"""
 
         if not args:
-            return (guac_msg("chat", "Hm? Who do you want me to acknowledge?"),)
+            return guac_msg("chat", "Hm? Who do you want me to acknowledge?")
 
         if args[0] not in CONFIG["ignored"]:
-            return (
-                guac_msg(
-                    "chat",
-                    "They're not ignored lol, you trying to say something? :eyes:",
-                ),
+            return guac_msg(
+                "chat",
+                "They're not ignored lol, you trying to say something? :eyes:",
             )
 
         CONFIG["ignored"].remove(args[0])
         save_config()
 
-        return (
-            guac_msg(
-                "chat",
-                f"@{args[0]}'s commands will be not ignored from now on :)",
-            ),
+        return guac_msg(
+            "chat",
+            f"@{args[0]}'s commands will be not ignored from now on :)",
         )
 
     @staticmethod
-    def cmd_ignored(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_ignored(user: str, args: List[str]) -> str:
         """Auth command, lists the ignored users
         Syntax: ignored"""
 
@@ -480,118 +470,100 @@ class CommandParser:
         )
 
         if pid[0] is None:
-            return (pid[1],)
+            return pid[1]
 
-        return (
-            guac_msg("chat", f"@{user} Here's ur a list of ignored ppl heh: {pid}"),
-        )
+        return guac_msg("chat", f"@{user} Here's ur a list of ignored ppl heh: {pid}")
 
     @staticmethod
-    def cmd_insult(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_insult(user: str, args: List[str]) -> str:
         """Noauth command, insults a specified user
         Syntax: insult <user>"""
 
         if not args:
-            return (guac_msg("chat", "I like.. need the <user> to insult them lmao"),)
+            return guac_msg("chat", "I like.. need the <user> to insult them lmao")
 
         if args[0] == "me":
             args[0] = user
 
         if args[0] == CONFIG["user-name"] and user == CONFIG["user-name"]:
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{args[0]} I would never insult you <3",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{args[0]} I would never insult you <3",
             )
 
         if args[0] == CONFIG["bot-name"]:
-            return (
-                guac_msg(
-                    "chat",
-                    f"Hey, @{user}, do you really think I suck? I have feelings too :(",
-                ),
+            return guac_msg(
+                "chat",
+                f"Hey, @{user}, do you really think I suck? I have feelings too :(",
             )
 
         if args[0] == CONFIG["user-name"]:
-            return (
-                guac_msg(
-                    "chat",
-                    f"Come on, @{user}, {CONFIG['user-name']} is my owner, why would I insult them?",
-                ),
+            return guac_msg(
+                "chat",
+                f"Come on, @{user}, {CONFIG['user-name']} is my owner, why would I insult them?",
             )
 
-        return (
-            guac_msg(
-                "chat",
-                " ".join(
-                    f"@{args[0]} you are a {' '.join(RANDOM.choice(CONFIG['insults'][_from]) for _from in ('descriptors', 'adjectives', 'nouns'))}".split()
-                ),
+        return guac_msg(
+            "chat",
+            " ".join(
+                f"@{args[0]} you are a {' '.join(RANDOM.choice(CONFIG['insults'][_from]) for _from in ('descriptors', 'adjectives', 'nouns'))}".split()
             ),
         )
 
     @staticmethod
-    def cmd_revokey(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_revokey(user: str, args: List[str]) -> str:
         """Noauth command, revoke current auth key
         Syntax: revokey"""
 
         reset_authkey()
-        return (guac_msg("chat", f"@{user} the current auth key has been revoked"),)
+        return guac_msg("chat", f"@{user} the current auth key has been revoked")
 
     @staticmethod
-    def cmd_alias(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_alias(user: str, args: List[str]) -> str:
         """Auth command, aliases a command to a command
         Syntax: alias <name> <content...>"""
 
         if len(args) < 2:
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{user} O, You made a mistake lmao, gimme the <name> AND the <content...>",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{user} O, You made a mistake lmao, gimme the <name> AND the <content...>",
             )
 
         if args[0] in CONFIG["aliases"]:
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{user} alias {args[0]!r} already exists :(",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{user} alias {args[0]!r} already exists :(",
             )
 
         CONFIG["aliases"][args[0]] = " ".join(args[1:])
         save_config()
 
-        return (guac_msg("chat", f"Alias {args[0]!r} saved"),)
+        return guac_msg("chat", f"Alias {args[0]!r} saved")
 
     @staticmethod
-    def cmd_unalias(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_unalias(user: str, args: List[str]) -> str:
         """Auth command, unaliases an alias
         Syntax: unalias <name>"""
 
         if not args:
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{user} Hm? What do I need to unalias?",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{user} Hm? What do I need to unalias?",
             )
 
         if args[0] not in CONFIG["aliases"]:
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{user} I'm like... 101% sure alias {args[0]!r} doesn't exist",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{user} I'm like... 101% sure alias {args[0]!r} doesn't exist",
             )
 
         del CONFIG["aliases"][args[0]]
         save_config()
 
-        return (guac_msg("chat", f"Unaliased {args[0]!r}"),)
+        return guac_msg("chat", f"Unaliased {args[0]!r}")
 
     @staticmethod
-    def cmd_aliases(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_aliases(user: str, args: List[str]) -> str:
         """Auth command, lists the aliases
         Syntax: aliases"""
 
@@ -604,29 +576,25 @@ class CommandParser:
         )
 
         if pid[0] is None:
-            return (pid[1],)
+            return pid[1]
 
-        return (guac_msg("chat", f"@{user} Here's a list of your aliases: {pid}"),)
+        return guac_msg("chat", f"@{user} Here's a list of your aliases: {pid}")
 
     @classmethod
-    def cmd_report(cls, user: str, args: List[str]) -> Tuple[str]:
+    def cmd_report(cls, user: str, args: List[str]) -> str:
         """Auth command, reports a user
         Syntax: report <user> <reason>"""
 
         if not CONFIG["report-webhook-url"].strip():
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{user} please ask the owner ({CONFIG['user-name']}) to set reports up",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{user} please ask the owner ({CONFIG['user-name']}) to set reports up",
             )
 
         if len(args) < 2:
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{user} Who and for what do I report to admins/mods?",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{user} Who and for what do I report to admins/mods?",
             )
 
         _report_content: str = " ".join(args[1:])
@@ -650,24 +618,20 @@ class CommandParser:
 
         # Respond to user
 
-        return (
-            guac_msg(
-                "chat",
-                f"Reported user @{args[0]} to admins/mods, imagine getting banned :skull:",
-            ),
+        return guac_msg(
+            "chat",
+            f"Reported user @{args[0]} to admins/mods, imagine getting banned :skull:",
         )
 
     @staticmethod
-    def cmd_sendkey(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_sendkey(user: str, args: List[str]) -> str:
         """Noauth command, sends the auth key to the specified hook
         Syntax: sendkey"""
 
         if not CONFIG["authkey-webhook-url"].strip():
-            return (
-                guac_msg(
-                    "chat",
-                    f"@{user} the config isn't set up properly to use sendkey, you forgot a thing",
-                ),
+            return guac_msg(
+                "chat",
+                f"@{user} the config isn't set up properly to use sendkey, you forgot a thing",
             )
 
         wh = random_embed(
@@ -678,15 +642,13 @@ class CommandParser:
 
         log(f"Sent key to discord webhook: {wh.execute()}")
 
-        return (
-            guac_msg(
-                "chat",
-                f"@{user} the key has been sent",
-            ),
+        return guac_msg(
+            "chat",
+            f"@{user} the key has been sent",
         )
 
     @staticmethod
-    def cmd_chatlog(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_chatlog(user: str, args: List[str]) -> str:
         """Auth command, gets current chatlog
         Syntax: chatlog"""
 
@@ -696,49 +658,46 @@ class CommandParser:
         )
 
         if pid[0] is None:
-            return (pid[1],)
+            return pid[1]
 
-        return (
-            guac_msg(
-                "chat",
-                f"@{user} Current chatlog (limit: {CONFIG['chatlog-limit']}): {pid}",
-            ),
+        return guac_msg(
+            "chat",
+            f"@{user} Current chatlog (limit: {CONFIG['chatlog-limit']}): {pid}",
         )
 
     @staticmethod
-    def cmd_dumplog(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_dumplog(user: str, args: List[str]) -> str:
         """Auth command, dumps current chatlog
         Syntax: dumplog"""
 
         _dumplog_filename: str = dump_log(f"{user} {generate_time_str()}")
 
-        return (
-            guac_msg(
-                "chat",
-                f"@{user} Dumped to {_dumplog_filename}",
-            ),
+        return guac_msg(
+            "chat",
+            f"@{user} Dumped to {_dumplog_filename}",
         )
 
     @staticmethod
-    def cmd_say(user: str, args: List[str]) -> Tuple[str]:
+    def cmd_say(user: str, args: List[str]) -> str:
         """Auth command, says whatever you say it to say
         Syntax: dumplog"""
 
-        return (
-            guac_msg(
-                "chat",
-                " ".join(args),
-            ),
+        if not args:
+            return guac_msg("chat", f"Eh, you do it @{user}")
+
+        return guac_msg(
+            "chat",
+            " ".join(args),
         )
 
 
 class MessageParser:
     @staticmethod
-    def type_nop(content: List[str]) -> Tuple[str]:
-        return (guac_msg("nop"),)
+    def type_nop(content: List[str]) -> str:
+        return guac_msg("nop")
 
     @classmethod
-    def type_chat(cls, content: List[str]) -> Tuple[str]:
+    def type_chat(cls, content: List[str]) -> str:
         str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
 
@@ -762,7 +721,7 @@ class MessageParser:
                 return cls.type_nop(content)
 
             log(f"{user!r} mentioned the owner without any conrext")
-            return (guac_msg("chat", f"@{user} smh whattttttttttttt"),)
+            return guac_msg("chat", f"@{user} smh whattttttttttttt")
 
         command: List[str] = list(
             map(
@@ -772,7 +731,7 @@ class MessageParser:
         )
         _dad_joke_im: str = content[1].lower().split(" ", 1)[0]
 
-        def _check_command() -> Optional[Tuple[str]]:
+        def _check_command() -> Optional[str]:
             if not command:
                 return cls.type_nop(content)
 
@@ -802,18 +761,16 @@ class MessageParser:
                 log(
                     f"User {user!r} said they're from special users ({_dad_joke_who!r})"
                 )
-                return (guac_msg("chat", f"@{user} Yeah I doubt lmao"),)
+                return guac_msg("chat", f"@{user} Yeah I doubt lmao")
 
             log(f"User {user!r} invoked a dad joke: {_dad_joke_who!r}")
-            return (
-                guac_msg("chat", f"Hi {_dad_joke_who}, I'm {CONFIG['bot-name']} :)"),
-            )
+            return guac_msg("chat", f"Hi {_dad_joke_who}, I'm {CONFIG['bot-name']} :)")
 
         _bot_mention: str = f"@{CONFIG['bot-name']}"
 
         if content[1].startswith(_bot_mention) and not len(command):
             log(f"{user!r} mentioned the bot without a command")
-            return (guac_msg("chat", f"@{user} Huh? What do you want lol"),)
+            return guac_msg("chat", f"@{user} Huh? What do you want lol")
 
         if content[1].startswith(f"{_bot_mention} "):
             log(f"User {user!r} invoked {command!r}")
@@ -836,39 +793,35 @@ class MessageParser:
                     except RecursionError:
                         log(f"Recursive alias detected: {command[0]!r}")
 
-                        return (
-                            guac_msg(
-                                "chat", "ZAMN! Your alias is *extremely* recursive"
-                            ),
+                        return guac_msg(
+                            "chat", "ZAMN! Your alias is *extremely* recursive"
                         )
 
-                return (guac_msg("chat", f"Lmao what even is {command[0]!r}?"),)
+                return guac_msg("chat", f"Lmao what even is {command[0]!r}?")
 
             if (cmd_handler.__doc__ or "").strip().startswith("Noauth"):
                 return cmd_handler(user, command[1:])
 
             if user not in AUTH["users"]:
-                return (
-                    guac_msg("chat", f"Hey {user!r}, you are not authenticated :("),
-                )
+                return guac_msg("chat", f"Hey {user!r}, you are not authenticated :(")
 
             return cmd_handler(user, command[1:])
 
         return cls.type_nop(content)
 
     @classmethod
-    def type_adduser(cls, content: List[str]) -> Tuple[str]:
+    def type_adduser(cls, content: List[str]) -> str:
         if not content[1].startswith("scrot"):
             chatlog_entry("Joined", content[1], "JOIN")
 
             if RANDOM.randint(0, 1000) == 420:
                 log(f"Welcoming {content[1]!r}")
-                return (guac_msg("chat", f"Welcome, {content[1]!r}. How are you?"),)
+                return guac_msg("chat", f"Welcome, {content[1]!r}. How are you?")
 
         return cls.type_nop(content)
 
     @classmethod
-    def type_remuser(cls, content: List[str]) -> Tuple[str]:
+    def type_remuser(cls, content: List[str]) -> str:
         if not content[1].startswith("scrot"):
             chatlog_entry("Left", content[1], "LEAVE")
 
@@ -878,12 +831,12 @@ class MessageParser:
 
             if RANDOM.randint(0, 1000) == 69:
                 log(f"Saying goodbye to {content[1]!r}")
-                return (guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day"),)
+                return guac_msg("chat", f"Goodbye, {content[1]!r}. Have a nice day")
 
         return cls.type_nop(content)
 
     @classmethod
-    def type_rename(cls, content: List[str]) -> Tuple[str]:
+    def type_rename(cls, content: List[str]) -> str:
         chatlog_entry(f"{content[1]!r} -> {content[2]!r}", content[1], "RENANE")
 
         if content[2] in AUTH["users"]:
@@ -893,7 +846,7 @@ class MessageParser:
         return cls.type_nop(content)
 
     @classmethod
-    def type_turn(cls, content: List[str]) -> Tuple[str]:
+    def type_turn(cls, content: List[str]) -> str:
         if len(content) > 2:
             chatlog_entry(
                 f"Took turn for {int(content[0]) / 1000} seconds", content[2], "TURN"
@@ -902,7 +855,7 @@ class MessageParser:
         return cls.type_nop(content)
 
     @classmethod
-    def type_vote(cls, content: List[str]) -> Tuple[str]:
+    def type_vote(cls, content: List[str]) -> str:
         chatlog_entry(
             f"{VOTE_STATES.get(int(content[0])) or 'Unknown vote type'}: {' '.join(content)}",
             "Server",
@@ -959,11 +912,12 @@ async def main() -> int:
                 )
                 continue
 
-            for cmsg in (
-                getattr(MessageParser, f"type_{parsed_msg[0]}", None)
-                or MessageParser.type_nop
-            )(parsed_msg[1:]):
-                await ws.send_str(cmsg)
+            await ws.send_str(
+                (
+                    getattr(MessageParser, f"type_{parsed_msg[0]}", None)
+                    or MessageParser.type_nop
+                )(parsed_msg[1:])
+            )
 
             if not STATE["run"]:
                 log("Run state was set to false")
