@@ -719,6 +719,18 @@ class CommandParser:
             ),
         )
 
+    @staticmethod
+    def cmd_say(user: str, args: List[str]) -> Tuple[str]:
+        """Auth command, says whatever you say it to say
+        Syntax: dumplog"""
+
+        return (
+            guac_msg(
+                "chat",
+                " ".join(args),
+            ),
+        )
+
 
 class MessageParser:
     @staticmethod
