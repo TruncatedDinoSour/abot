@@ -704,6 +704,9 @@ class MessageParser:
         if user and user != CONFIG["bot-name"]:
             chatlog_entry(str_msg, user)
 
+        if user == "Mr. Ware" and "@Emperor Palpatine is not the senate" in str_msg:
+            return guac_msg("chat", f"@{user} Yes he is >:(")
+
         if (
             len(content) > 3
             or len(str_msg) > (100 + len(CONFIG["bot-name"]))
