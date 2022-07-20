@@ -705,6 +705,7 @@ class MessageParser:
             chatlog_entry(str_msg, user)
 
         if user == "Mr. Ware" and "@Emperor Palpatine is not the senate" in str_msg:
+            log(f"{user} bot is lying again smh")
             return guac_msg("chat", f"@{user} Yes he is >:(")
 
         if (
