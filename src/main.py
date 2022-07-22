@@ -77,7 +77,7 @@ def gen_key() -> str:
 
 
 GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}}
-AUTH: Dict[str, Any] = {"users": set(), "key": gen_key()}
+AUTH: Dict[str, Any] = {"users": set(), "key": ""}
 STATE: Dict[str, Any] = {"run": True, "vm": "", "chatlog": []}
 VOTE_STATES: Dict[int, str] = {
     0: "Vote started",
@@ -905,7 +905,8 @@ async def main() -> int:
         if CONFIG["init-message"].strip():
             await ws.send_str(guac_msg("chat", CONFIG["init-message"]))
 
-        log(f"Auth key: {AUTH['key']}")
+        reset_authkey()
+        AUTH["users"].clear()
 
         async for msg in ws:
             parsed_msg: Optional[List[str]] = unguac_msg(msg.data)
