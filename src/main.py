@@ -805,7 +805,7 @@ class MessageParser:
         str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
 
-        if user.lower() in CONFIG["impersonators"]:
+        if user.lower() in CONFIG["impersonators"] and user not in AUTH["users"]:
             return guac_msg("chat", f"@{user} is an impersonator. Do not trust them.")
 
         if user and user != CONFIG["bot-name"]:
