@@ -690,6 +690,38 @@ class CommandParser:
             " ".join(args),
         )
 
+    @staticmethod
+    def cmd_searchnote(user: str, args: List[str]) -> str:
+        """Noauth command, searches for a note
+        Syntax: searchnote <search>"""
+
+        if not args:
+            return guac_msg("chat", f"@{user} Gimme a query to find a note")
+
+        query: str = " ".join(args)
+
+        for note in CONFIG["notes"]:
+            if query in note:
+                return guac_msg("chat", f"@{user} Found note: {note}")
+
+        return guac_msg("chat", f"@{user} No notes that matches this found")
+
+    @staticmethod
+    def cmd_searchalias(user: str, args: List[str]) -> str:
+        """Noauth command, searches for an alias
+        Syntax: searchalias <search>"""
+
+        if not args:
+            return guac_msg("chat", f"@{user} ??huh?? What alias should I look for?")
+
+        query: str = " ".join(args)
+
+        for alias in CONFIG["aliases"]:
+            if query in alias:
+                return guac_msg("chat", f"@{user} Found alias: {alias}")
+
+        return guac_msg("chat", f"@{user} No aliases matches your query")
+
 
 class MessageParser:
     @staticmethod
