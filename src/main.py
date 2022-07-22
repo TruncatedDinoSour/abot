@@ -65,6 +65,12 @@ CONFIG: Dict[str, Any] = {
     "logs-dir": "logs",
     "autodump-chatlogs": True,
     "impersonators": [],
+    "not-impersonators": [
+        "general darian",
+        "specialized egg",
+        "emperor palpatine",
+        "mr. ware",
+    ],
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -274,8 +280,14 @@ def chatlog_entry(message: str, user: str, header: Optional[str] = None) -> None
 
 def check_impersonation(user: str) -> Optional[str]:
     _special: tuple[str, str] = (CONFIG["bot-name"], CONFIG["user-name"])
+    user = user.lower()
 
-    if user and any([special in user for special in _special]) and user not in _special:
+    if (
+        user not in CONFIG["not-impersonators"]
+        and user
+        and any([special in user.lower() for special in _special])
+        and user not in _special
+    ):
         log(f"Found impersonator: {user!r}")
 
         chatlog_entry("Found impersonator", user, "IMPERSONATOR")
@@ -739,6 +751,49 @@ class CommandParser:
 
         return guac_msg("chat", f"@{user} No aliases matches your query")
 
+    @staticmethod
+    def cmd_impersonator(user: str, args: List[str]) -> str:
+        """Auth command, marks a user as an impersonator
+        Syntax: impersonator <user>"""
+
+        if not args:
+            return guac_msg("chat", f"@{user} Whos an impersonator")
+
+        if args[0] in (CONFIG["bot-name"], CONFIG["user-name"]):
+            return guac_msg("chat", f"@{user} I doubt lmao")
+
+        CONFIG["impersonators"].append(args[0])
+        return guac_msg("chat", f"@{user} Yep. added {args[0]!r} as an impersonator")
+
+    @staticmethod
+    def cmd_notimpersonator(user: str, args: List[str]) -> str:
+        """Auth command, marks a user as not an impersonator
+        Syntax: notimpersonator <user>"""
+
+        if not args:
+            return guac_msg("chat", f"@{user} Whos an impersonator")
+
+        if args[0] in (CONFIG["bot-name"], CONFIG["user-name"]):
+            return guac_msg("chat", f"@{user} Yeah. Lol")
+
+        if (
+            args[0] in CONFIG["not-impersonators"]
+            and args[0] not in CONFIG["impersonators"]
+        ):
+            return guac_msg(
+                "chat", f"@{user} {args[0]!r} isn't marked as an impersonator"
+            )
+
+        if args[0] in CONFIG["impersonators"]:
+            CONFIG["impersonators"].remove(args[0])
+
+        if args[0] not in CONFIG["not-impersonators"]:
+            CONFIG["not-impersonators"].append(args[0])
+
+        return guac_msg(
+            "chat", f"@{user} {args[0]!r} is now marked as not an impersonator"
+        )
+
 
 class MessageParser:
     @staticmethod
@@ -750,7 +805,7 @@ class MessageParser:
         str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
 
-        if user in CONFIG["impersonators"]:
+        if user.lower() in CONFIG["impersonators"]:
             return guac_msg("chat", f"@{user} is an impersonator. Do not trust them.")
 
         if user and user != CONFIG["bot-name"]:
@@ -937,6 +992,10 @@ async def main() -> int:
     else:
         with open(CONFIG_FILE, "r") as cfg:
             CONFIG.update(json.load(cfg))
+
+    log("Preparing impersonators list")
+    CONFIG["impersonators"] = list(map(str.lower, CONFIG["impersonators"]))
+    save_config()
 
     STATE["vm"] = CONFIG["vm"]
 
