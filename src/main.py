@@ -64,6 +64,7 @@ CONFIG: Dict[str, Any] = {
     "chatlog-limit": 500,
     "logs-dir": "logs",
     "autodump-chatlogs": True,
+    "impersonators": [],
 }
 RANDOM: SystemRandom = SystemRandom()
 
@@ -269,6 +270,22 @@ def chatlog_entry(message: str, user: str, header: Optional[str] = None) -> None
 {user!r} @ {_time}: \
 {message}"
     )
+
+
+def check_impersonation(user: str) -> Optional[str]:
+    _special: tuple[str, str] = (CONFIG["bot-name"], CONFIG["user-name"])
+
+    if user and any([special in user for special in _special]) and user not in _special:
+        log(f"Found impersonator: {user!r}")
+
+        chatlog_entry("Found impersonator", user, "IMPERSONATOR")
+
+        CONFIG["impersonators"].append(user)
+        save_config()
+
+        return guac_msg("chat", f"Found impersonator: {user!r}")
+
+    return None
 
 
 class CommandParser:
@@ -733,6 +750,9 @@ class MessageParser:
         str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
 
+        if user in CONFIG["impersonators"]:
+            return guac_msg("chat", f"@{user} is an impersonator. Do not trust them.")
+
         if user and user != CONFIG["bot-name"]:
             chatlog_entry(str_msg, user)
 
@@ -847,6 +867,9 @@ class MessageParser:
 
     @classmethod
     def type_adduser(cls, content: List[str]) -> str:
+        if ret := check_impersonation(content[1]):
+            return ret
+
         if not content[1].startswith("scrot"):
             chatlog_entry("Joined", content[1], "JOIN")
 
@@ -873,6 +896,9 @@ class MessageParser:
 
     @classmethod
     def type_rename(cls, content: List[str]) -> str:
+        if ret := check_impersonation(content[2]):
+            return ret
+
         chatlog_entry(f"{content[1]!r} -> {content[2]!r}", content[1], "RENANE")
 
         if content[2] in AUTH["users"]:
