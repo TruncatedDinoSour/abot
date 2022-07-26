@@ -1167,7 +1167,6 @@ class MessageParser:
 
         if (
             len(content) > 3
-            or len(str_msg) > (100 + len(CONFIG["bot-name"]))
             or not user
             or user == CONFIG["bot-name"]
         ):
