@@ -4,3 +4,4 @@ aiohttp
 requests
 discord-webhook
 DateTime
+guacamole-keysyms
