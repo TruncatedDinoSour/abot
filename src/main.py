@@ -1062,7 +1062,7 @@ class CommandParser:
         if type(keys) is str:
             return guac_msg("chat", f"@{user} {keys}")
 
-        STATE["sleep"] = 0.08
+        STATE["sleep"] = 0.04
         return tuple(guac_msg("key", str(code), str(state)) for code, state in keys)  # type: ignore
 
     @staticmethod
@@ -1152,8 +1152,11 @@ class MessageParser:
         str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
 
+        if user in CONFIG["ignored"]:
+            return cls.type_nop(content)
+
         if user.lower() in CONFIG["impersonators"] and user not in AUTH["users"]:
-            return guac_msg("chat", f"@{user} is an impersonator. Do not trust them.")
+            return guac_msg("chat", f"User {user} is an impersonator. Do not trust them.")
 
         if user and user != CONFIG["bot-name"]:
             chatlog_entry(str_msg, user)
@@ -1166,7 +1169,6 @@ class MessageParser:
             len(content) > 3
             or len(str_msg) > (100 + len(CONFIG["bot-name"]))
             or not user
-            or user in CONFIG["ignored"]
             or user == CONFIG["bot-name"]
         ):
             return cls.type_nop(content)
