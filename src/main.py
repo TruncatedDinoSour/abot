@@ -367,14 +367,21 @@ Chatlog: {paste(_chatlog, 'No chatlog')}""",
     return wh
 
 
-def save_config() -> None:
+def reload_config() -> None:
+    log("Reloading config")
+
+    with open(CONFIG_FILE, "r") as cfg:
+        CONFIG.update(json.load(cfg))
+
+
+def save_config(reload: bool = True) -> None:
     log("Saving config")
 
     with open(CONFIG_FILE, "w") as cfg:
         json.dump(CONFIG, cfg, indent=4)
 
-    with open(CONFIG_FILE, "r") as cfg:
-        CONFIG.update(json.load(cfg))
+    if reload:
+        reload_config()
 
 
 def guac_msg(*args: str) -> str:
@@ -1094,6 +1101,14 @@ class CommandParser:
 
         return cls.cmd_keys(user, [CONFIG["keys"][args[0]]])
 
+    @staticmethod
+    def cmd_reloadcfg(user: str, args: List[str]) -> str:
+        """Auth command, reload config
+        Syntax: reloadcfg"""
+
+        reload_config()
+        return guac_msg("chat", f"Configuration {CONFIG_FILE!r} reloaded")
+
 
 class MessageParser:
     @staticmethod
@@ -1286,12 +1301,9 @@ async def main() -> int:
 
     if not os.path.isfile(CONFIG_FILE):
         log(f"Making default config in {CONFIG_FILE!r}")
-
-        with open(CONFIG_FILE, "w") as cfg:
-            json.dump(CONFIG, cfg, indent=4)
+        save_config(False)
     else:
-        with open(CONFIG_FILE, "r") as cfg:
-            CONFIG.update(json.load(cfg))
+        reload_config()
 
     log("Preparing impersonators list")
     CONFIG["impersonators"] = list(map(str.lower, CONFIG["impersonators"]))
@@ -1351,7 +1363,7 @@ async def main() -> int:
                 await ws.close()
                 break
 
-    save_config()
+    save_config(False)
 
     if CONFIG["autodump-chatlogs"]:
         log(f"Dumped log: {dump_log(generate_time_str())!r}")
