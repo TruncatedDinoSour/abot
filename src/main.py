@@ -85,9 +85,21 @@ def gen_key() -> str:
     return "".join(_key)
 
 
-GUAC_CACHE: Dict[str, Dict[Any, Any]] = {"guac": {}, "unguac": {}, "guac-keys": {}}
-AUTH: Dict[str, Any] = {"users": set(), "key": ""}
-STATE: Dict[str, Any] = {"run": True, "vm": "", "chatlog": []}
+GUAC_CACHE: Dict[str, Dict[Any, Any]] = {
+    "guac": {},
+    "unguac": {},
+    "guac-keys": {},
+}
+AUTH: Dict[str, Any] = {
+    "users": set(),
+    "key": "",
+}
+STATE: Dict[str, Any] = {
+    "run": True,
+    "vm": "",
+    "chatlog": [],
+    "sleep": 0,
+}
 VOTE_STATES: Dict[int, str] = {
     0: "Vote started",
     1: "Someone voted/removed their vote",
@@ -103,6 +115,9 @@ GUAC_KEYS_SPECIAL_MAPPING: Dict[str, Dict[str, UnshiftedKeyCodes]] = {
         "b": UnshiftedKeyCodes.BACKSPACE,
         "w": UnshiftedKeyCodes.LEFT_WINDOW_KEY,
         ")": ord(")"),
+        "s": UnshiftedKeyCodes.SHIFT,
+        "t": UnshiftedKeyCodes.TAB,
+        "l": UnshiftedKeyCodes.NUM_LOCK,
     },
     "arrow": {
         "l": UnshiftedKeyCodes.LEFT_ARROW,
@@ -1047,6 +1062,7 @@ class CommandParser:
         if type(keys) is str:
             return guac_msg("chat", f"@{user} {keys}")
 
+        STATE["sleep"] = 0.08
         return tuple(guac_msg("key", str(code), str(state)) for code, state in keys)  # type: ignore
 
     @staticmethod
@@ -1371,8 +1387,12 @@ async def main() -> int:
                 result = (result,)
 
             for send_msg in result:
-                await asyncio.sleep(0.08)
+                if STATE["sleep"]:
+                    await asyncio.sleep(STATE["sleep"])
+
                 await ws.send_str(send_msg)
+
+            STATE["sleep"] = 0
 
             if not STATE["run"]:
                 log("Run state was set to false")
