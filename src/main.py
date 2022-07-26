@@ -1149,16 +1149,14 @@ class MessageParser:
 
     @classmethod
     def type_chat(cls, content: List[str]) -> Union[str, Tuple[str, ...]]:
-        str_msg: str = html_unescape(" ".join(content[1:]))
+        str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
 
         if user in CONFIG["ignored"]:
             return cls.type_nop(content)
 
         if user.lower() in CONFIG["impersonators"] and user not in AUTH["users"]:
-            return guac_msg(
-                "chat", f"User {user} is an impersonator. Do not trust them."
-            )
+            return guac_msg("chat", f"User {user} is an impersonator. Do not trust them.")
 
         if user and user != CONFIG["bot-name"]:
             chatlog_entry(str_msg, user)
@@ -1167,7 +1165,11 @@ class MessageParser:
             log(f"{user} bot is lying again smh")
             return guac_msg("chat", f"@{user} Yes he is >:(")
 
-        if len(content) > 3 or not user or user == CONFIG["bot-name"]:
+        if (
+            len(content) > 3
+            or not user
+            or user == CONFIG["bot-name"]
+        ):
             return cls.type_nop(content)
 
         if content[1].lower().strip() in (
