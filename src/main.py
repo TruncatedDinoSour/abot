@@ -1097,7 +1097,7 @@ class CommandParser:
             return guac_msg("chat", f"@{user} Gimme the key combo name")
 
         if args[0] not in CONFIG["keys"]:
-            return guac_msg("chat", f"@{user} Coun't find {args[0]!r} :shrug:")
+            return guac_msg("chat", f"@{user} Couldn't find {args[0]!r} :shrug:")
 
         return cls.cmd_keys(user, [CONFIG["keys"][args[0]]])
 
@@ -1108,6 +1108,22 @@ class CommandParser:
 
         reload_config()
         return guac_msg("chat", f"Configuration {CONFIG_FILE!r} reloaded")
+
+    @staticmethod
+    def cmd_dkey(user: str, args: List[str]) -> str:
+        """Auth command, delete a key combo
+        Syntax: dkey <combo_name>"""
+
+        if not args:
+            return guac_msg("chat", f"@{user} ")
+
+        if args[0] not in CONFIG["keys"]:
+            return guac_msg("chat", f"@{user} Won't delete {args[0]!r} Reason: yes")
+
+        del CONFIG["keys"][args[0]]
+        save_config()
+
+        return guac_msg("chat", f"@{user} Deleted {args[0]!r}")
 
 
 class MessageParser:
