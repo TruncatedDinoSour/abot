@@ -140,7 +140,7 @@ def parse_guac_keys(keys: str) -> Union[List[Tuple[int, int]], str]:
     max_ip: int = len(keys)
     ip: int = 0
 
-    special_chars: Tuple[str, ...] = ("^", "\\", "~", "[", "(", "!", "{", "|")
+    special_chars: Tuple[str, ...] = ("^", "\\", "~", "[", "(", "!", "{", "|", "<")
 
     while ip < max_ip:
         char: str = keys[ip]
@@ -320,6 +320,39 @@ def parse_guac_keys(keys: str) -> Union[List[Tuple[int, int]], str]:
                         (GUAC_KEYS_SPECIAL_MAPPING["escape"][char], state)
                         for state in (1, 0)
                     )
+
+                case "<":
+                    _keycode: str = ""
+                    _keycode_ip: int = ip
+                    _keycode_hit_state: bool = False
+
+                    while char != ">":
+                        if char == ":" and not _keycode_hit_state:
+                            _keycode_hit_state = True
+
+                        if (
+                            not char.isnumeric()
+                            and ip != _keycode_ip
+                            and char != ":"
+                            and not _keycode_hit_state
+                        ):
+                            return f"Invalid character in manual character: {char!r}"
+
+                        _keycode += char
+
+                        ip += 1
+                        if (ret := check_inc_ip("No keycpde end")) is not None:
+                            return ret
+                        char = keys[ip]
+
+                    _keycode = _keycode[1:]
+
+                    keycodes: List = _keycode.split(":")
+
+                    if len(keycodes) < 2:
+                        keycodes.append(1)
+
+                    results.append(tuple(map(int, keycodes)))  # type: ignore
         else:
             results.extend(
                 (
@@ -1156,7 +1189,9 @@ class MessageParser:
             return cls.type_nop(content)
 
         if user.lower() in CONFIG["impersonators"] and user not in AUTH["users"]:
-            return guac_msg("chat", f"User {user} is an impersonator. Do not trust them.")
+            return guac_msg(
+                "chat", f"User {user} is an impersonator. Do not trust them."
+            )
 
         if user and user != CONFIG["bot-name"]:
             chatlog_entry(str_msg, user)
@@ -1165,11 +1200,7 @@ class MessageParser:
             log(f"{user} bot is lying again smh")
             return guac_msg("chat", f"@{user} Yes he is >:(")
 
-        if (
-            len(content) > 3
-            or not user
-            or user == CONFIG["bot-name"]
-        ):
+        if len(content) > 3 or not user or user == CONFIG["bot-name"]:
             return cls.type_nop(content)
 
         if content[1].lower().strip() in (
