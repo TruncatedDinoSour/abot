@@ -108,22 +108,22 @@ VOTE_STATES: Dict[int, str] = {
 }
 GUAC_KEYS_SPECIAL_MAPPING: Dict[str, Dict[str, UnshiftedKeyCodes]] = {
     "escape": {
-        "n": UnshiftedKeyCodes.ENTER,
+        "n": KeyIdentifiers.ENTER,
         "e": KeyIdentifiers.ESCAPE,
         "c": UnshiftedKeyCodes.CTRL,
-        "a": UnshiftedKeyCodes.ALT,
-        "b": UnshiftedKeyCodes.BACKSPACE,
-        "w": UnshiftedKeyCodes.LEFT_WINDOW_KEY,
+        "a": KeyIdentifiers.ALT,
+        "b": KeyIdentifiers.BACKSPACE,
+        "w": KeyIdentifiers.WIN,
         ")": ord(")"),
-        "s": UnshiftedKeyCodes.SHIFT,
-        "t": UnshiftedKeyCodes.TAB,
-        "l": UnshiftedKeyCodes.NUM_LOCK,
+        "s": KeyIdentifiers.SHIFT,
+        "t": KeyIdentifiers.TAB,
+        "l": KeyIdentifiers.NUM_LOCK,
     },
     "arrow": {
-        "l": UnshiftedKeyCodes.LEFT_ARROW,
-        "u": UnshiftedKeyCodes.UP_ARROW,
-        "r": UnshiftedKeyCodes.RIGHT_ARROW,
-        "d": UnshiftedKeyCodes.DOWN_ARROW,
+        "l": KeyIdentifiers.ARROW_LEFT,
+        "u": KeyIdentifiers.ARROW_UP,
+        "r": KeyIdentifiers.ARROW_RIGHT,
+        "d": KeyIdentifiers.ARROW_DOWN,
     },
 }
 
@@ -217,9 +217,7 @@ def parse_guac_keys(keys: str) -> Union[List[Tuple[int, int]], str]:
 
                     _f_key = _f_key[1:]
 
-                    if (
-                        f_key := getattr(UnshiftedKeyCodes, f"F{_f_key}", None)
-                    ) is None:
+                    if (f_key := getattr(KeyIdentifiers, f"F{_f_key}", None)) is None:
                         return f"Invalid F key: {_f_key!r}"
 
                     results.extend(((f_key, 1), (f_key, 0)))
