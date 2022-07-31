@@ -140,7 +140,18 @@ def parse_guac_keys(keys: str) -> Union[List[Tuple[int, int]], str]:
     max_ip: int = len(keys)
     ip: int = 0
 
-    special_chars: Tuple[str, ...] = ("^", "\\", "~", "[", "(", "!", "{", "|", "<")
+    special_chars: Tuple[str, ...] = (
+        "@",
+        "^",
+        "\\",
+        "~",
+        "[",
+        "(",
+        "!",
+        "{",
+        "|",
+        "<",
+    )
 
     while ip < max_ip:
         char: str = keys[ip]
@@ -156,6 +167,29 @@ def parse_guac_keys(keys: str) -> Union[List[Tuple[int, int]], str]:
 
         if char in special_chars:
             match char:
+                case "@":
+                    _combo_name: str = ""
+
+                    while char != ";":
+                        _combo_name += char
+
+                        ip += 1
+                        if (ret := check_inc_ip("No combo end")) is not None:
+                            return ret
+                        char = keys[ip]
+
+                    _combo_name = _combo_name[1:]
+
+                    if _combo_name not in CONFIG["keys"]:
+                        return f"No combo {_combo_name!r} found"
+
+                    combo = parse_guac_keys(CONFIG["keys"][_combo_name])
+
+                    if type(combo) == str:
+                        return f"{_combo_name}: combo"
+
+                    results.extend(combo)  # type: ignore
+
                 case "^":
                     ip += 1
                     if (
