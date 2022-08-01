@@ -692,7 +692,7 @@ class CommandParser:
         return guac_msg("chat", f"{CONFIG_FILE!r} saved")
 
     @staticmethod
-    def cmd_note(user: str, args: List[str]) -> str:
+    def cmd_note(user: str, args: List[str]) -> Union[Tuple[str, ...], str]:
         """Auth command, makes a note and then saves the config
         Syntax: note <name> <content...>"""
 
@@ -701,12 +701,23 @@ class CommandParser:
                 "chat", "Huh? I kinda need the <name> and the <conrent> of the note"
             )
 
+        existed: bool = args[0] in CONFIG["notes"]
+        old_note: str = ""
+
+        if existed:
+            old_note = CONFIG["notes"][args[0]]
+
         CONFIG["notes"][args[0]] = " ".join(args[1:])
 
         save_config()
 
-        if args[0] in CONFIG["notes"]:
-            return guac_msg("chat", f"Lol, done, note {args[0]!r} edited ;)")
+        if existed:
+            log(f"Edited note {args[0]!r} -- {old_note!r}")
+
+            return (
+                guac_msg("chat", f"Lol, done, note {args[0]!r} edited ;)"),
+                guac_msg("chat", f"> {old_note}"),
+            )
 
         return guac_msg("chat", f"Note {args[0]!r} saved <3")
 
