@@ -938,7 +938,7 @@ class CommandParser:
         """Auth command, reports a user
         Syntax: report <user> <reason>"""
 
-        if not CONFIG["report-webhook-url"].strip():
+        if not CONFIG["report-webhook-url"]:
             return guac_msg(
                 "chat",
                 f"@{user} please ask the owner ({CONFIG['user-name']}) to set reports up",
@@ -981,7 +981,7 @@ class CommandParser:
         """Noauth command, sends the auth key to the specified hook
         Syntax: sendkey"""
 
-        if not CONFIG["authkey-webhook-url"].strip():
+        if not CONFIG["authkey-webhook-url"]:
             return guac_msg(
                 "chat",
                 f"@{user} the config isn't set up properly to use sendkey, you forgot a thing",
