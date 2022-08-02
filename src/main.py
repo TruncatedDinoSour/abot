@@ -1228,6 +1228,9 @@ class MessageParser:
         str_msg: str = " ".join(content[1:])
         user: str = content[0].strip()
 
+        if user and user != CONFIG["bot-name"]:
+            chatlog_entry(str_msg, user)
+
         if user in CONFIG["ignored"]:
             return cls.type_nop(content)
 
@@ -1235,9 +1238,6 @@ class MessageParser:
             return guac_msg(
                 "chat", f"User {user} is an impersonator. Do not trust them."
             )
-
-        if user and user != CONFIG["bot-name"]:
-            chatlog_entry(str_msg, user)
 
         if user == "Mr. Ware" and "@Emperor Palpatine is not the senate" in str_msg:
             log(f"{user} bot is lying again smh")
@@ -1377,7 +1377,7 @@ class MessageParser:
         if ret := check_impersonation(content[2]):
             return ret
 
-        chatlog_entry(f"{content[1]!r} -> {content[2]!r}", content[1], "RENANE")
+        chatlog_entry(f"{content[1]!r} -> {content[2]!r}", content[1], "RENAME")
 
         if content[2] in AUTH["users"]:
             log(f"User has renamed themselves so logging {content[2]!r} out")
