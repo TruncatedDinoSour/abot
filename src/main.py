@@ -404,7 +404,7 @@ def paste(content: str, no_content_msg: str) -> Union[str, Tuple[None, str]]:
     if not content:
         return None, guac_msg("chat", no_content_msg)
 
-    burl: str = "https://www.toptal.com/developers/hastebin"
+    burl: str = "https://hastebin.com"
 
     pid = requests.post(
         f"{burl}/documents",
@@ -1320,7 +1320,8 @@ class MessageParser:
                         return cls.type_chat(
                             [
                                 user,
-                                f"@{CONFIG['bot-name']} {CONFIG['aliases'][command[0]]} {' '.join(command[1:])}".strip(),
+                                f"@{CONFIG['bot-name']} {CONFIG['aliases'][command[0]]} \
+{html_unescape(' '.join(str_msg.split(' ')[2:]))}".strip(),
                             ]
                         )
                     except RecursionError:
