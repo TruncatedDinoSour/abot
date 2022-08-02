@@ -1225,7 +1225,7 @@ class MessageParser:
 
     @classmethod
     def type_chat(cls, content: List[str]) -> Union[str, Tuple[str, ...]]:
-        str_msg: str = " ".join(content[1:])
+        str_msg: str = html_unescape(" ".join(content[1:]))
         user: str = content[0].strip()
 
         if user and user != CONFIG["bot-name"]:
@@ -1258,7 +1258,7 @@ class MessageParser:
 
         command: List[str] = list(
             map(
-                lambda s: html_unescape(s).replace("`", " "),
+                lambda s: s.replace("`", " "),
                 str_msg.split()[1:],
             )
         )
@@ -1321,7 +1321,7 @@ class MessageParser:
                             [
                                 user,
                                 f"@{CONFIG['bot-name']} {CONFIG['aliases'][command[0]]} \
-{html_unescape(' '.join(str_msg.split(' ')[2:]))}".strip(),
+{' '.join(str_msg.split(' ')[2:])}".strip(),
                             ]
                         )
                     except RecursionError:
