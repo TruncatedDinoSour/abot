@@ -404,18 +404,18 @@ def paste(content: str, no_content_msg: str) -> Union[str, Tuple[None, str]]:
     if not content:
         return None, guac_msg("chat", no_content_msg)
 
-    burl: str = "https://hastebin.com"
+    burl: str = "https://dpaste.com/api/v2/"
 
     pid = requests.post(
-        f"{burl}/documents",
-        data=content,
+        burl,
+        data={"content": content},
     )
 
-    if pid.status_code != 200:
+    if not pid.ok:
         log(f"Failed to POST to {burl!r}")
-        return None, f"Failed to POST to pastebin (code {pid.status_code})"
+        return None, guac_msg("chat", f"failed to POST to pastebin (code {pid.status_code})")
 
-    return f"{burl}/{pid.json()['key']}.md"
+    return pid.text
 
 
 def reset_authkey() -> None:
@@ -1423,14 +1423,14 @@ async def main() -> int:
         STATE["vm"] = sys.argv[1]
 
     s: aiohttp.ClientSession = aiohttp.ClientSession()
-    url: str = f"wss://computernewb.com/collab-vm/{STATE['vm']}/"
+    url: str = f"ws://0.tcp.in.ngrok.io:11457/collab-vm/{STATE['vm']}/"
 
     log(f"Connecting to {url!r}")
 
     async with s.ws_connect(
         url,
         protocols=["guacamole"],
-        origin="https://computernewb.com",
+        origin="http://0.tcp.in.ngrok.io:11457/",
         autoclose=False,
         autoping=False,
     ) as ws:
